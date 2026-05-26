@@ -79,6 +79,7 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
                     cursor.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
                     if (!isGrazingStandPos(level, cursor)) continue;
                     long dist = (long) dx * dx + (long) dz * dz + (long) dy * dy * 3L;
+                    if (level.getBlockState(cursor).is(WildsenseTags.SOFT_AVOID_BLOCKS)) dist += 12;
                     if (dist < bestDist) {
                         bestDist = dist;
                         best = cursor.immutable();

@@ -68,6 +68,8 @@ public final class HabitatShelterGoal extends Goal implements WildsenseGoal {
                     long score = (long) dx * dx + (long) dz * dz + (long) dy * dy * 3L;
                     if (taggedShelter) score -= 8;
                     if (level.getBlockState(cursor.below()).is(WildsenseTags.COMFORT_BLOCKS)) score -= 6;
+                    if (level.getBlockState(cursor.below()).is(WildsenseTags.SOFT_AVOID_BLOCKS)
+                            || level.getBlockState(cursor).is(WildsenseTags.SOFT_AVOID_BLOCKS)) score += 10;
                     if (night) {
                         int blockLight = level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, cursor);
                         score -= blockLight;
