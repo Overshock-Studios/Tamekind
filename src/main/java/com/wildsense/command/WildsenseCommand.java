@@ -34,6 +34,8 @@ public final class WildsenseCommand {
                                 .executes(WildsenseCommand::reportAnimal))
                         .then(Commands.literal("config")
                                 .executes(WildsenseCommand::reportConfig))
+                        .then(Commands.literal("reload")
+                                .executes(WildsenseCommand::reloadConfig))
                         .then(Commands.literal("profile")
                                 .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
                                         .suggests((c, b) -> {
@@ -94,6 +96,18 @@ public final class WildsenseCommand {
                 formatAnimal(leader),
                 formatAnimal(adult))), false);
         return 1;
+    }
+
+    private static int reloadConfig(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        try {
+            WildsenseConfig.load(net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("wildsense.properties"));
+            source.sendSuccess(() -> Component.literal("[Wildsense] Config reloaded."), true);
+            return 1;
+        } catch (Exception e) {
+            source.sendFailure(Component.literal("[Wildsense] Reload failed: " + e.getMessage()));
+            return 0;
+        }
     }
 
     private static int applyProfile(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
