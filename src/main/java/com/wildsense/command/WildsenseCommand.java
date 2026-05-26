@@ -47,6 +47,9 @@ public final class WildsenseCommand {
                                 .executes(WildsenseCommand::forgetNearest))
                         .then(Commands.literal("trust")
                                 .executes(WildsenseCommand::reportTrust))
+                        .then(Commands.literal("disable")
+                                .then(Commands.argument("type", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                                        .executes(WildsenseCommand::toggleDisable)))
                         .then(Commands.literal("profile")
                                 .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
                                         .suggests((c, b) -> {
@@ -112,6 +115,26 @@ public final class WildsenseCommand {
                 "  home=%s guarding=%s",
                 home == null ? "none" : home.getX() + " " + home.getY() + " " + home.getZ(),
                 guarding)), false);
+        return 1;
+    }
+
+    private static int toggleDisable(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        String id = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "type").trim();
+        net.minecraft.resources.Identifier identifier;
+        try {
+            identifier = net.minecraft.resources.Identifier.parse(id.contains(":") ? id : "minecraft:" + id);
+        } catch (Exception e) {
+            source.sendFailure(Component.literal("[Wildsense] Invalid entity id: " + id));
+            return 0;
+        }
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(identifier);
+        if (type == null) {
+            source.sendFailure(Component.literal("[Wildsense] Unknown entity type: " + identifier));
+            return 0;
+        }
+        boolean nowDisabled = com.wildsense.ai.WildsenseAnimalRules.toggleRuntimeDisable(type);
+        source.sendSuccess(() -> Component.literal("[Wildsense] " + identifier + (nowDisabled ? " disabled" : " enabled")), true);
         return 1;
     }
 

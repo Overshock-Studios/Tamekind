@@ -21,7 +21,8 @@ public final class PassiveEventDirector {
 
     private static void afterDamage(LivingEntity entity, DamageSource source,
                                     float baseDamageTaken, float damageTaken, boolean blocked) {
-        if (!WildsenseConfig.enabled || damageTaken <= 0.0f || !(entity instanceof Animal animal)) return;
+        if (!WildsenseConfig.enabled || !(entity instanceof Animal animal)) return;
+        if (damageTaken <= 0.0f && !source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) return;
         Vec3 danger = dangerPosition(animal, source);
         DangerBroadcaster.rememberAndSpread(animal, danger);
         Entity attacker = source.getEntity();

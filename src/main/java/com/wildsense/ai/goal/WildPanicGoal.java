@@ -35,14 +35,16 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
         if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
         AnimalMemory memory = AnimalMemoryStore.get(animal);
         memory.tick(animal.level().getGameTime());
-        Entity threat = ThreatScanner.nearestThreat(animal, WildsenseConfig.panicRadius);
+        double panicRadius = WildsenseConfig.panicRadius;
+        if (animal.isBaby()) panicRadius *= WildsenseConfig.babyPanicRadiusMultiplier;
+        Entity threat = ThreatScanner.nearestThreat(animal, panicRadius);
         if (threat != null) {
             danger = threat.position();
             DangerBroadcaster.rememberAndSpread(animal, danger);
             return true;
         }
         danger = memory.dangerPos(animal.level().getGameTime());
-        return danger != null && animal.distanceToSqr(danger) < WildsenseConfig.panicRadius * WildsenseConfig.panicRadius * 2.0;
+        return danger != null && animal.distanceToSqr(danger) < panicRadius * panicRadius * 2.0;
     }
 
     @Override
@@ -79,7 +81,9 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
         }
         BlockPos escape = chooseEscapePos();
         if (escape == null) return;
-        animal.getNavigation().moveTo(escape.getX() + 0.5, escape.getY(), escape.getZ() + 0.5, WildsenseConfig.panicSpeed);
+        double speed = WildsenseConfig.panicSpeed;
+        if (animal.isBaby()) speed *= WildsenseConfig.babyPanicSpeedMultiplier;
+        animal.getNavigation().moveTo(escape.getX() + 0.5, escape.getY(), escape.getZ() + 0.5, speed);
     }
 
     private Animal nearestSameTypeBaby() {
@@ -191,7 +195,7 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
         Vec3 push = motion.normalize().scale(WildsenseConfig.stampedeKnockback * scale);
         for (Entity entity : animal.level().getEntities(animal, box, entity -> entity.isAlive() && entity.isPushable())) {
             if (entity.isPassenger() || entity.isVehicle()) continue;
-            if (entity instanceof Animal other && WildsenseAnimalRules.skipMovementGoals(other)) continue;
+            if (entity instanceof Animal other && (other.isBaby() || WildsenseAnimalRules.skipMovementGoals(other))) continue;
             entity.push(push.x, 0.08 * scale, push.z);
         }
     }

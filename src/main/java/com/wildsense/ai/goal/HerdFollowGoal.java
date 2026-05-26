@@ -1,6 +1,7 @@
 package com.wildsense.ai.goal;
 
 import com.wildsense.ai.AiLod;
+import com.wildsense.ai.AnimalMemoryStore;
 import com.wildsense.ai.HerdCoordinator;
 import com.wildsense.ai.WildsenseAnimalRules;
 import com.wildsense.config.WildsenseConfig;
@@ -25,7 +26,10 @@ public final class HerdFollowGoal extends Goal implements WildsenseGoal {
         AiLod lod = AiLod.forAnimal(animal);
         if (lod == AiLod.SLEEP || !HerdCoordinator.isHerdable(animal)) return false;
         leader = HerdCoordinator.leaderFor(animal);
-        return leader != null && leader != animal && animal.distanceToSqr(leader) > 36.0;
+        if (leader == null || leader == animal) return false;
+        long now = animal.level().getGameTime();
+        if (AnimalMemoryStore.get(leader).dangerPos(now) != null) return false;
+        return animal.distanceToSqr(leader) > 36.0;
     }
 
     @Override

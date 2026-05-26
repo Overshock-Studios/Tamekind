@@ -63,6 +63,8 @@ public final class WildsenseConfig {
     public static double alertDriftSpeed = 0.65;
 
     public static double panicSpeed = 1.35;
+    public static double babyPanicSpeedMultiplier = 0.75;
+    public static double babyPanicRadiusMultiplier = 0.7;
     public static double herdFollowSpeed = 1.05;
     public static double babyAnchorSpeed = 1.2;
     public static double shelterSpeed = 1.0;
@@ -224,6 +226,8 @@ public final class WildsenseConfig {
         alertDriftSpeed = decimal(properties, "alertDriftSpeed", alertDriftSpeed);
 
         panicSpeed = decimal(properties, "panicSpeed", panicSpeed);
+        babyPanicSpeedMultiplier = decimal(properties, "babyPanicSpeedMultiplier", babyPanicSpeedMultiplier);
+        babyPanicRadiusMultiplier = decimal(properties, "babyPanicRadiusMultiplier", babyPanicRadiusMultiplier);
         herdFollowSpeed = decimal(properties, "herdFollowSpeed", herdFollowSpeed);
         babyAnchorSpeed = decimal(properties, "babyAnchorSpeed", babyAnchorSpeed);
         shelterSpeed = decimal(properties, "shelterSpeed", shelterSpeed);
@@ -288,6 +292,8 @@ public final class WildsenseConfig {
         properties.setProperty("alertFreezeRandomTicks", Integer.toString(alertFreezeRandomTicks));
         properties.setProperty("alertDriftSpeed", Double.toString(alertDriftSpeed));
         properties.setProperty("panicSpeed", Double.toString(panicSpeed));
+        properties.setProperty("babyPanicSpeedMultiplier", Double.toString(babyPanicSpeedMultiplier));
+        properties.setProperty("babyPanicRadiusMultiplier", Double.toString(babyPanicRadiusMultiplier));
         properties.setProperty("herdFollowSpeed", Double.toString(herdFollowSpeed));
         properties.setProperty("babyAnchorSpeed", Double.toString(babyAnchorSpeed));
         properties.setProperty("shelterSpeed", Double.toString(shelterSpeed));
