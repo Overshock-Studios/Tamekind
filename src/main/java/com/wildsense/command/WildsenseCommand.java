@@ -95,6 +95,12 @@ public final class WildsenseCommand {
                 "  leader=%s nearestAdult=%s",
                 formatAnimal(leader),
                 formatAnimal(adult))), false);
+        BlockPos home = memory.home();
+        boolean guarding = memory.isGuarding(now);
+        source.sendSuccess(() -> Component.literal(String.format(
+                "  home=%s guarding=%s",
+                home == null ? "none" : home.getX() + " " + home.getY() + " " + home.getZ(),
+                guarding)), false);
         return 1;
     }
 
@@ -152,6 +158,27 @@ public final class WildsenseCommand {
                 WildsenseConfig.respectLeashedAnimals,
                 WildsenseConfig.respectMountedAnimals,
                 WildsenseConfig.respectBreedingAnimals)), false);
+        source.sendSuccess(() -> Component.literal(String.format(
+                "  graze: radius=%d interval=%d duration=%d  drink: radius=%d interval=%d duration=%d",
+                WildsenseConfig.grazeSearchRadius,
+                WildsenseConfig.grazeMinIntervalTicks,
+                WildsenseConfig.grazeDurationTicks,
+                WildsenseConfig.drinkSearchRadius,
+                WildsenseConfig.drinkMinIntervalTicks,
+                WildsenseConfig.drinkDurationTicks)), false);
+        source.sendSuccess(() -> Component.literal(String.format(
+                "  parentGuard=%s ticks=%d radius=%d  breedingSoftLimit=%d",
+                WildsenseConfig.parentGuardEnabled,
+                WildsenseConfig.parentGuardTicks,
+                WildsenseConfig.parentGuardRadius,
+                WildsenseConfig.breedingCrowdSoftLimit)), false);
+        source.sendSuccess(() -> Component.literal(String.format(
+                "  homeReturn=%s min=%d max=%d interval=%d speed=%.2f",
+                WildsenseConfig.homeReturnEnabled,
+                WildsenseConfig.homeReturnMinDistance,
+                WildsenseConfig.homeReturnMaxDistance,
+                WildsenseConfig.homeReturnIntervalTicks,
+                WildsenseConfig.homeReturnSpeed)), false);
         return 1;
     }
 
