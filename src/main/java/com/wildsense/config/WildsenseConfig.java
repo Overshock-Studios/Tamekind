@@ -59,6 +59,82 @@ public final class WildsenseConfig {
     private WildsenseConfig() {
     }
 
+    public enum Profile {
+        VANILLA_PLUS,
+        REALISM,
+        SIMULATION;
+
+        public static Profile fromString(String name) {
+            if (name == null) return null;
+            String n = name.trim().toLowerCase(java.util.Locale.ROOT).replace('-', '_');
+            return switch (n) {
+                case "vanilla+", "vanilla_plus", "quiet" -> VANILLA_PLUS;
+                case "realism", "survival" -> REALISM;
+                case "simulation", "high_simulation", "high" -> SIMULATION;
+                default -> null;
+            };
+        }
+    }
+
+    public static void applyProfile(Profile profile) {
+        switch (profile) {
+            case VANILLA_PLUS -> {
+                enabled = true;
+                herdEnabled = true;
+                alertEnabled = true;
+                panicEnabled = true;
+                habitatEnabled = false;
+                trustEnabled = true;
+                stampedeEnabled = false;
+                babyAnchoringEnabled = true;
+                breedingCrowdControlEnabled = true;
+                dailyRhythmEnabled = false;
+                fullAiRange = 32;
+                simpleAiRange = 64;
+                aiLodCacheTicks = 40;
+                alertRadius = 12;
+                panicRadius = 6;
+                herdSearchRadius = 12;
+            }
+            case REALISM -> {
+                enabled = true;
+                herdEnabled = true;
+                alertEnabled = true;
+                panicEnabled = true;
+                habitatEnabled = true;
+                trustEnabled = true;
+                stampedeEnabled = true;
+                babyAnchoringEnabled = true;
+                breedingCrowdControlEnabled = true;
+                dailyRhythmEnabled = true;
+                fullAiRange = 48;
+                simpleAiRange = 96;
+                aiLodCacheTicks = 20;
+                alertRadius = 18;
+                panicRadius = 8;
+                herdSearchRadius = 16;
+            }
+            case SIMULATION -> {
+                enabled = true;
+                herdEnabled = true;
+                alertEnabled = true;
+                panicEnabled = true;
+                habitatEnabled = true;
+                trustEnabled = true;
+                stampedeEnabled = true;
+                babyAnchoringEnabled = true;
+                breedingCrowdControlEnabled = true;
+                dailyRhythmEnabled = true;
+                fullAiRange = 64;
+                simpleAiRange = 128;
+                aiLodCacheTicks = 10;
+                alertRadius = 24;
+                panicRadius = 10;
+                herdSearchRadius = 24;
+            }
+        }
+    }
+
     public static void load(Path path) {
         Properties properties = defaults();
         if (Files.exists(path)) {

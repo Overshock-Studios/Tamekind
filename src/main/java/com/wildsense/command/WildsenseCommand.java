@@ -33,7 +33,16 @@ public final class WildsenseCommand {
                         .then(Commands.literal("animal")
                                 .executes(WildsenseCommand::reportAnimal))
                         .then(Commands.literal("config")
-                                .executes(WildsenseCommand::reportConfig))));
+                                .executes(WildsenseCommand::reportConfig))
+                        .then(Commands.literal("profile")
+                                .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                        .suggests((c, b) -> {
+                                            b.suggest("vanilla+");
+                                            b.suggest("realism");
+                                            b.suggest("simulation");
+                                            return b.buildFuture();
+                                        })
+                                        .executes(WildsenseCommand::applyProfile)))));
     }
 
     private static int reportAnimal(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
@@ -84,6 +93,19 @@ public final class WildsenseCommand {
                 "  leader=%s nearestAdult=%s",
                 formatAnimal(leader),
                 formatAnimal(adult))), false);
+        return 1;
+    }
+
+    private static int applyProfile(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        String name = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
+        WildsenseConfig.Profile profile = WildsenseConfig.Profile.fromString(name);
+        if (profile == null) {
+            source.sendFailure(Component.literal("[Wildsense] Unknown profile '" + name + "'. Use vanilla+, realism, or simulation."));
+            return 0;
+        }
+        WildsenseConfig.applyProfile(profile);
+        source.sendSuccess(() -> Component.literal("[Wildsense] Applied profile: " + profile.name().toLowerCase(java.util.Locale.ROOT)), true);
         return 1;
     }
 
