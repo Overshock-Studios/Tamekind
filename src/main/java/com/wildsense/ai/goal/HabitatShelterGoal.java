@@ -52,6 +52,7 @@ public final class HabitatShelterGoal extends Goal implements WildsenseGoal {
         BlockPos best = null;
         long bestScore = Long.MAX_VALUE;
         int radius = WildsenseConfig.shelterSearchRadius;
+        boolean night = !level.isBrightOutside();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
@@ -66,6 +67,11 @@ public final class HabitatShelterGoal extends Goal implements WildsenseGoal {
                     if (!covered && !taggedShelter) continue;
                     long score = (long) dx * dx + (long) dz * dz + (long) dy * dy * 3L;
                     if (taggedShelter) score -= 8;
+                    if (level.getBlockState(cursor.below()).is(WildsenseTags.COMFORT_BLOCKS)) score -= 6;
+                    if (night) {
+                        int blockLight = level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, cursor);
+                        score -= blockLight;
+                    }
                     if (score < bestScore) {
                         bestScore = score;
                         best = cursor.immutable();
