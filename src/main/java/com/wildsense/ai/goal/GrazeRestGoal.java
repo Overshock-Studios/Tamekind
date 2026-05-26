@@ -46,7 +46,9 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
 
     @Override
     public void start() {
-        grazeTicks = WildsenseConfig.grazeDurationTicks + animal.getRandom().nextInt(Math.max(1, WildsenseConfig.grazeDurationTicks));
+        int base = WildsenseConfig.grazeDurationTicks;
+        if (!animal.level().isBrightOutside()) base *= 3;
+        grazeTicks = base + animal.getRandom().nextInt(Math.max(1, base));
         if (animal.blockPosition().distSqr(grazingSpot) > 3.0) {
             animal.getNavigation().moveTo(grazingSpot.getX() + 0.5, grazingSpot.getY(), grazingSpot.getZ() + 0.5, 0.8);
         } else {
@@ -71,7 +73,8 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
     }
 
     private BlockPos findGrazingSpot(Level level, BlockPos origin) {
-        if (isGrazingStandPos(level, origin)) return origin;
+        if (isRestStandPos(level, origin)) return origin;
+        boolean night = !level.isBrightOutside();
         BlockPos best = null;
         long bestDist = Long.MAX_VALUE;
         int radius = WildsenseConfig.grazeSearchRadius;
@@ -80,9 +83,10 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
             for (int dz = -radius; dz <= radius; dz++) {
                 for (int dy = -1; dy <= 1; dy++) {
                     cursor.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
-                    if (!isGrazingStandPos(level, cursor)) continue;
+                    if (!isRestStandPos(level, cursor)) continue;
                     long dist = (long) dx * dx + (long) dz * dz + (long) dy * dy * 3L;
                     if (level.getBlockState(cursor).is(WildsenseTags.SOFT_AVOID_BLOCKS)) dist += 12;
+                    if (night && level.getBlockState(cursor.below()).is(WildsenseTags.COMFORT_BLOCKS)) dist -= 10;
                     if (dist < bestDist) {
                         bestDist = dist;
                         best = cursor.immutable();
@@ -93,10 +97,11 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
         return best;
     }
 
-    private boolean isGrazingStandPos(Level level, BlockPos pos) {
-        return level.getBlockState(pos).isAir()
-                && level.getBlockState(pos.above()).isAir()
-                && level.getBlockState(pos.below()).is(WildsenseTags.GRAZING_BLOCKS)
-                && !level.getBlockState(pos.below()).is(WildsenseTags.AVOID_BLOCKS);
+    private boolean isRestStandPos(Level level, BlockPos pos) {
+        if (!level.getBlockState(pos).isAir()) return false;
+        if (!level.getBlockState(pos.above()).isAir()) return false;
+        if (level.getBlockState(pos.below()).is(WildsenseTags.AVOID_BLOCKS)) return false;
+        return level.getBlockState(pos.below()).is(WildsenseTags.GRAZING_BLOCKS)
+                || level.getBlockState(pos.below()).is(WildsenseTags.COMFORT_BLOCKS);
     }
 }
