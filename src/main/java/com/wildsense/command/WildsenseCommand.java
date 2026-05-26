@@ -36,6 +36,9 @@ public final class WildsenseCommand {
                                 .executes(WildsenseCommand::reportConfig))
                         .then(Commands.literal("reload")
                                 .executes(WildsenseCommand::reloadConfig))
+                        .then(Commands.literal("home")
+                                .then(Commands.literal("clear")
+                                        .executes(WildsenseCommand::clearHome)))
                         .then(Commands.literal("profile")
                                 .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
                                         .suggests((c, b) -> {
@@ -101,6 +104,22 @@ public final class WildsenseCommand {
                 "  home=%s guarding=%s",
                 home == null ? "none" : home.getX() + " " + home.getY() + " " + home.getZ(),
                 guarding)), false);
+        return 1;
+    }
+
+    private static int clearHome(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        ServerLevel level = source.getLevel();
+        AABB box = AABB.ofSize(source.getPosition(), ANIMAL_SCAN_SIZE, ANIMAL_SCAN_SIZE, ANIMAL_SCAN_SIZE);
+        Animal animal = level.getEntitiesOfClass(Animal.class, box).stream()
+                .min(Comparator.comparingDouble(candidate -> candidate.distanceToSqr(source.getPosition())))
+                .orElse(null);
+        if (animal == null) {
+            source.sendFailure(Component.literal("[Wildsense] No animal within " + (int) ANIMAL_SCAN_SIZE + " blocks."));
+            return 0;
+        }
+        AnimalMemoryStore.get(animal).setHome(null);
+        source.sendSuccess(() -> Component.literal("[Wildsense] Cleared home for " + animal.getType().toShortString() + "#" + animal.getId()), false);
         return 1;
     }
 
@@ -180,6 +199,11 @@ public final class WildsenseCommand {
                 WildsenseConfig.homeReturnMaxDistance,
                 WildsenseConfig.homeReturnIntervalTicks,
                 WildsenseConfig.homeReturnSpeed)), false);
+        source.sendSuccess(() -> Component.literal(String.format(
+                "  alertFreeze: min=%d random=%d driftSpeed=%.2f",
+                WildsenseConfig.alertFreezeMinTicks,
+                WildsenseConfig.alertFreezeRandomTicks,
+                WildsenseConfig.alertDriftSpeed)), false);
         return 1;
     }
 
