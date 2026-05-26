@@ -45,6 +45,9 @@ public final class WildsenseConfig {
     public static int grazeSearchRadius = 5;
     public static int grazeMinIntervalTicks = 20 * 12;
     public static int grazeDurationTicks = 20 * 4;
+    public static int drinkSearchRadius = 8;
+    public static int drinkMinIntervalTicks = 20 * 60;
+    public static int drinkDurationTicks = 20 * 3;
 
     public static double panicSpeed = 1.35;
     public static double herdFollowSpeed = 1.05;
@@ -189,6 +192,9 @@ public final class WildsenseConfig {
         grazeSearchRadius = integer(properties, "grazeSearchRadius", grazeSearchRadius);
         grazeMinIntervalTicks = integer(properties, "grazeMinIntervalTicks", grazeMinIntervalTicks);
         grazeDurationTicks = integer(properties, "grazeDurationTicks", grazeDurationTicks);
+        drinkSearchRadius = integer(properties, "drinkSearchRadius", drinkSearchRadius);
+        drinkMinIntervalTicks = integer(properties, "drinkMinIntervalTicks", drinkMinIntervalTicks);
+        drinkDurationTicks = integer(properties, "drinkDurationTicks", drinkDurationTicks);
 
         panicSpeed = decimal(properties, "panicSpeed", panicSpeed);
         herdFollowSpeed = decimal(properties, "herdFollowSpeed", herdFollowSpeed);
@@ -237,6 +243,9 @@ public final class WildsenseConfig {
         properties.setProperty("grazeSearchRadius", Integer.toString(grazeSearchRadius));
         properties.setProperty("grazeMinIntervalTicks", Integer.toString(grazeMinIntervalTicks));
         properties.setProperty("grazeDurationTicks", Integer.toString(grazeDurationTicks));
+        properties.setProperty("drinkSearchRadius", Integer.toString(drinkSearchRadius));
+        properties.setProperty("drinkMinIntervalTicks", Integer.toString(drinkMinIntervalTicks));
+        properties.setProperty("drinkDurationTicks", Integer.toString(drinkDurationTicks));
         properties.setProperty("panicSpeed", Double.toString(panicSpeed));
         properties.setProperty("herdFollowSpeed", Double.toString(herdFollowSpeed));
         properties.setProperty("babyAnchorSpeed", Double.toString(babyAnchorSpeed));

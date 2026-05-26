@@ -13,6 +13,7 @@ public final class WildsenseTags {
     public static final TagKey<Block> GRAZING_BLOCKS = block("grazing_blocks");
     public static final TagKey<Block> SHELTER_BLOCKS = block("shelter_blocks");
     public static final TagKey<Block> AVOID_BLOCKS = block("avoid_blocks");
+    public static final TagKey<Block> WATER_BLOCKS = block("water_blocks");
 
     private WildsenseTags() {
     }
