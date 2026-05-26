@@ -52,6 +52,11 @@ public final class WildsenseConfig {
     public static int parentGuardTicks = 20 * 8;
     public static int parentGuardRadius = 12;
     public static boolean parentGuardEnabled = true;
+    public static boolean homeReturnEnabled = true;
+    public static int homeReturnMaxDistance = 64;
+    public static int homeReturnMinDistance = 16;
+    public static int homeReturnIntervalTicks = 20 * 30;
+    public static double homeReturnSpeed = 0.9;
 
     public static double panicSpeed = 1.35;
     public static double herdFollowSpeed = 1.05;
@@ -203,6 +208,11 @@ public final class WildsenseConfig {
         parentGuardTicks = integer(properties, "parentGuardTicks", parentGuardTicks);
         parentGuardRadius = integer(properties, "parentGuardRadius", parentGuardRadius);
         parentGuardEnabled = bool(properties, "parentGuardEnabled", parentGuardEnabled);
+        homeReturnEnabled = bool(properties, "homeReturnEnabled", homeReturnEnabled);
+        homeReturnMaxDistance = integer(properties, "homeReturnMaxDistance", homeReturnMaxDistance);
+        homeReturnMinDistance = integer(properties, "homeReturnMinDistance", homeReturnMinDistance);
+        homeReturnIntervalTicks = integer(properties, "homeReturnIntervalTicks", homeReturnIntervalTicks);
+        homeReturnSpeed = decimal(properties, "homeReturnSpeed", homeReturnSpeed);
 
         panicSpeed = decimal(properties, "panicSpeed", panicSpeed);
         herdFollowSpeed = decimal(properties, "herdFollowSpeed", herdFollowSpeed);
@@ -258,6 +268,11 @@ public final class WildsenseConfig {
         properties.setProperty("parentGuardTicks", Integer.toString(parentGuardTicks));
         properties.setProperty("parentGuardRadius", Integer.toString(parentGuardRadius));
         properties.setProperty("parentGuardEnabled", Boolean.toString(parentGuardEnabled));
+        properties.setProperty("homeReturnEnabled", Boolean.toString(homeReturnEnabled));
+        properties.setProperty("homeReturnMaxDistance", Integer.toString(homeReturnMaxDistance));
+        properties.setProperty("homeReturnMinDistance", Integer.toString(homeReturnMinDistance));
+        properties.setProperty("homeReturnIntervalTicks", Integer.toString(homeReturnIntervalTicks));
+        properties.setProperty("homeReturnSpeed", Double.toString(homeReturnSpeed));
         properties.setProperty("panicSpeed", Double.toString(panicSpeed));
         properties.setProperty("herdFollowSpeed", Double.toString(herdFollowSpeed));
         properties.setProperty("babyAnchorSpeed", Double.toString(babyAnchorSpeed));

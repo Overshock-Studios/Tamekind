@@ -1,5 +1,6 @@
 package com.wildsense.ai;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 public final class AnimalMemory {
     private static final String DANGER = "Danger";
+    private static final String HOME = "Home";
     private static final String TRUST = "Trust";
     private static final String X = "X";
     private static final String Y = "Y";
@@ -23,11 +25,20 @@ public final class AnimalMemory {
     private long dangerUntil;
     private long nextDangerSpreadAt;
     private long guardUntil;
+    private BlockPos homePos;
     private final Map<UUID, TrustEntry> trustedPlayers = new HashMap<>();
 
     public void rememberDanger(Vec3 pos, long untilTick) {
         this.dangerPos = pos;
         this.dangerUntil = untilTick;
+    }
+
+    public void setHome(BlockPos pos) {
+        this.homePos = pos == null ? null : pos.immutable();
+    }
+
+    public BlockPos home() {
+        return homePos;
     }
 
     public void markGuarding(long untilTick) {
@@ -98,6 +109,12 @@ public final class AnimalMemory {
             danger.putDouble(Z, dangerPos.z);
             danger.putLong(UNTIL, dangerUntil);
         }
+        if (homePos != null) {
+            ValueOutput home = output.child(HOME);
+            home.putInt(X, homePos.getX());
+            home.putInt(Y, homePos.getY());
+            home.putInt(Z, homePos.getZ());
+        }
         if (!trustedPlayers.isEmpty()) {
             ValueOutput.ValueOutputList trust = output.childrenList(TRUST);
             for (Map.Entry<UUID, TrustEntry> entry : trustedPlayers.entrySet()) {
@@ -112,7 +129,14 @@ public final class AnimalMemory {
     public void load(ValueInput input, long gameTime) {
         dangerPos = null;
         dangerUntil = 0L;
+        homePos = null;
         trustedPlayers.clear();
+
+        ValueInput home = input.childOrEmpty(HOME);
+        int hx = home.getIntOr(X, Integer.MIN_VALUE);
+        if (hx != Integer.MIN_VALUE) {
+            homePos = new BlockPos(hx, home.getIntOr(Y, 0), home.getIntOr(Z, 0));
+        }
 
         ValueInput danger = input.childOrEmpty(DANGER);
         long savedDangerUntil = danger.getLongOr(UNTIL, 0L);

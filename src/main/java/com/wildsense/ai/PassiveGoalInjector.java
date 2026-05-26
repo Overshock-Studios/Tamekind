@@ -4,6 +4,7 @@ import com.wildsense.ai.goal.AlertFreezeGoal;
 import com.wildsense.ai.goal.BabyAnchorGoal;
 import com.wildsense.ai.goal.DrinkGoal;
 import com.wildsense.ai.goal.GrazeRestGoal;
+import com.wildsense.ai.goal.HomeReturnGoal;
 import com.wildsense.ai.goal.HabitatShelterGoal;
 import com.wildsense.ai.goal.HerdFollowGoal;
 import com.wildsense.ai.goal.WildPanicGoal;
@@ -78,6 +79,7 @@ public final class PassiveGoalInjector {
         accessor.wildsense$goalSelector().addGoal(6, new HerdFollowGoal(animal));
         accessor.wildsense$goalSelector().addGoal(8, new GrazeRestGoal(animal));
         accessor.wildsense$goalSelector().addGoal(9, new DrinkGoal(animal));
+        accessor.wildsense$goalSelector().addGoal(10, new HomeReturnGoal(animal));
     }
 
     private static boolean hasWildsenseGoal(Animal animal) {

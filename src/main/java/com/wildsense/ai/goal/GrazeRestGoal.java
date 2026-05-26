@@ -63,6 +63,9 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
 
     @Override
     public void stop() {
+        if (grazingSpot != null && animal.blockPosition().distSqr(grazingSpot) < 9.0) {
+            AnimalMemoryStore.get(animal).setHome(grazingSpot);
+        }
         grazingSpot = null;
         grazeTicks = 0;
     }
