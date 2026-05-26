@@ -1,6 +1,7 @@
 package com.wildsense.ai.goal;
 
 import com.wildsense.ai.AiLod;
+import com.wildsense.ai.WildsenseAnimalRules;
 import com.wildsense.compat.WildsenseTags;
 import com.wildsense.config.WildsenseConfig;
 import net.minecraft.core.BlockPos;
@@ -23,6 +24,7 @@ public final class HabitatShelterGoal extends Goal implements WildsenseGoal {
     @Override
     public boolean canUse() {
         if (!WildsenseConfig.enabled || !WildsenseConfig.habitatEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
+        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
         if (animal.tickCount < nextScanTick) return false;
         nextScanTick = animal.tickCount + 80 + animal.getRandom().nextInt(80);
         Level level = animal.level();

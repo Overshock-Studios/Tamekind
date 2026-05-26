@@ -21,6 +21,9 @@ public final class WildsenseConfig {
     public static boolean breedingCrowdControlEnabled = true;
     public static boolean breedingCrowdMessageEnabled = true;
     public static boolean dailyRhythmEnabled = true;
+    public static boolean respectLeashedAnimals = true;
+    public static boolean respectMountedAnimals = true;
+    public static boolean respectBreedingAnimals = true;
 
     public static int fullAiRange = 48;
     public static int simpleAiRange = 96;
@@ -86,6 +89,9 @@ public final class WildsenseConfig {
         breedingCrowdControlEnabled = bool(properties, "breedingCrowdControlEnabled", breedingCrowdControlEnabled);
         breedingCrowdMessageEnabled = bool(properties, "breedingCrowdMessageEnabled", breedingCrowdMessageEnabled);
         dailyRhythmEnabled = bool(properties, "dailyRhythmEnabled", dailyRhythmEnabled);
+        respectLeashedAnimals = bool(properties, "respectLeashedAnimals", respectLeashedAnimals);
+        respectMountedAnimals = bool(properties, "respectMountedAnimals", respectMountedAnimals);
+        respectBreedingAnimals = bool(properties, "respectBreedingAnimals", respectBreedingAnimals);
 
         fullAiRange = integer(properties, "fullAiRange", fullAiRange);
         simpleAiRange = integer(properties, "simpleAiRange", simpleAiRange);
@@ -132,6 +138,9 @@ public final class WildsenseConfig {
         properties.setProperty("breedingCrowdControlEnabled", Boolean.toString(breedingCrowdControlEnabled));
         properties.setProperty("breedingCrowdMessageEnabled", Boolean.toString(breedingCrowdMessageEnabled));
         properties.setProperty("dailyRhythmEnabled", Boolean.toString(dailyRhythmEnabled));
+        properties.setProperty("respectLeashedAnimals", Boolean.toString(respectLeashedAnimals));
+        properties.setProperty("respectMountedAnimals", Boolean.toString(respectMountedAnimals));
+        properties.setProperty("respectBreedingAnimals", Boolean.toString(respectBreedingAnimals));
         properties.setProperty("fullAiRange", Integer.toString(fullAiRange));
         properties.setProperty("simpleAiRange", Integer.toString(simpleAiRange));
         properties.setProperty("aiLodCacheTicks", Integer.toString(aiLodCacheTicks));

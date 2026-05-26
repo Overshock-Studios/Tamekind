@@ -6,6 +6,7 @@ import com.wildsense.ai.AnimalMemoryStore;
 import com.wildsense.ai.DangerBroadcaster;
 import com.wildsense.ai.HerdCoordinator;
 import com.wildsense.ai.ThreatScanner;
+import com.wildsense.ai.WildsenseAnimalRules;
 import com.wildsense.compat.WildsenseTags;
 import com.wildsense.config.WildsenseConfig;
 import net.minecraft.core.BlockPos;
@@ -31,6 +32,7 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
     @Override
     public boolean canUse() {
         if (!WildsenseConfig.enabled || !WildsenseConfig.panicEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
+        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
         AnimalMemory memory = AnimalMemoryStore.get(animal);
         memory.tick(animal.level().getGameTime());
         Entity threat = ThreatScanner.nearestThreat(animal, WildsenseConfig.panicRadius);

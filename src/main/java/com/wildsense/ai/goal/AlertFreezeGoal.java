@@ -2,6 +2,7 @@ package com.wildsense.ai.goal;
 
 import com.wildsense.ai.AiLod;
 import com.wildsense.ai.ThreatScanner;
+import com.wildsense.ai.WildsenseAnimalRules;
 import com.wildsense.config.WildsenseConfig;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
@@ -22,6 +23,7 @@ public final class AlertFreezeGoal extends Goal implements WildsenseGoal {
     @Override
     public boolean canUse() {
         if (!WildsenseConfig.enabled || !WildsenseConfig.alertEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
+        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
         threat = ThreatScanner.nearestThreat(animal, WildsenseConfig.alertRadius);
         if (threat == null) return false;
         return animal.distanceToSqr(threat) > WildsenseConfig.panicRadius * WildsenseConfig.panicRadius;

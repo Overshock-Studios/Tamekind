@@ -3,6 +3,7 @@ package com.wildsense.ai.goal;
 import com.wildsense.ai.AiLod;
 import com.wildsense.ai.HerdCoordinator;
 import com.wildsense.ai.ThreatScanner;
+import com.wildsense.ai.WildsenseAnimalRules;
 import com.wildsense.config.WildsenseConfig;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
@@ -22,6 +23,7 @@ public final class BabyAnchorGoal extends Goal implements WildsenseGoal {
     @Override
     public boolean canUse() {
         if (!WildsenseConfig.enabled || !WildsenseConfig.babyAnchoringEnabled || !baby.isBaby()) return false;
+        if (WildsenseAnimalRules.skipMovementGoals(baby)) return false;
         AiLod lod = AiLod.forAnimal(baby);
         if (lod == AiLod.SLEEP) return false;
         adult = HerdCoordinator.nearestAdultForBaby(baby, WildsenseConfig.babyAnchorSearchRadius);

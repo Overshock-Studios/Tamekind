@@ -2,6 +2,7 @@ package com.wildsense.ai.goal;
 
 import com.wildsense.ai.AiLod;
 import com.wildsense.ai.HerdCoordinator;
+import com.wildsense.ai.WildsenseAnimalRules;
 import com.wildsense.config.WildsenseConfig;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -20,6 +21,7 @@ public final class HerdFollowGoal extends Goal implements WildsenseGoal {
     @Override
     public boolean canUse() {
         if (!WildsenseConfig.enabled || !WildsenseConfig.herdEnabled) return false;
+        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
         AiLod lod = AiLod.forAnimal(animal);
         if (lod == AiLod.SLEEP || !HerdCoordinator.isHerdable(animal)) return false;
         leader = HerdCoordinator.leaderFor(animal);

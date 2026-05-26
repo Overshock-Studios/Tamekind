@@ -2,6 +2,7 @@ package com.wildsense.ai.goal;
 
 import com.wildsense.ai.AiLod;
 import com.wildsense.ai.AnimalMemoryStore;
+import com.wildsense.ai.WildsenseAnimalRules;
 import com.wildsense.compat.WildsenseTags;
 import com.wildsense.config.WildsenseConfig;
 import net.minecraft.core.BlockPos;
@@ -25,6 +26,7 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
     @Override
     public boolean canUse() {
         if (!WildsenseConfig.enabled || !WildsenseConfig.dailyRhythmEnabled) return false;
+        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
         if (AiLod.forAnimal(animal) != AiLod.FULL) return false;
         if (animal.tickCount < nextTryTick) return false;
         nextTryTick = animal.tickCount + WildsenseConfig.grazeMinIntervalTicks

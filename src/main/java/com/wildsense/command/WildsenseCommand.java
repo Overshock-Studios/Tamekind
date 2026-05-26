@@ -111,6 +111,11 @@ public final class WildsenseCommand {
                 WildsenseConfig.breedingCrowdControlEnabled,
                 WildsenseConfig.breedingCrowdRadius,
                 WildsenseConfig.breedingCrowdHardLimit)), false);
+        source.sendSuccess(() -> Component.literal(String.format(
+                "  respectLeashed=%s respectMounted=%s respectBreeding=%s",
+                WildsenseConfig.respectLeashedAnimals,
+                WildsenseConfig.respectMountedAnimals,
+                WildsenseConfig.respectBreedingAnimals)), false);
         return 1;
     }
 
