@@ -154,10 +154,11 @@ public final class WildsenseCommand {
                 WildsenseConfig.breedingCrowdRadius,
                 WildsenseConfig.breedingCrowdHardLimit)), false);
         source.sendSuccess(() -> Component.literal(String.format(
-                "  respectLeashed=%s respectMounted=%s respectBreeding=%s",
+                "  respectLeashed=%s respectMounted=%s respectBreeding=%s respectNamed=%s",
                 WildsenseConfig.respectLeashedAnimals,
                 WildsenseConfig.respectMountedAnimals,
-                WildsenseConfig.respectBreedingAnimals)), false);
+                WildsenseConfig.respectBreedingAnimals,
+                WildsenseConfig.respectNamedAnimals)), false);
         source.sendSuccess(() -> Component.literal(String.format(
                 "  graze: radius=%d interval=%d duration=%d  drink: radius=%d interval=%d duration=%d",
                 WildsenseConfig.grazeSearchRadius,

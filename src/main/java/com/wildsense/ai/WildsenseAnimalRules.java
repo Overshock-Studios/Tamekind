@@ -10,6 +10,7 @@ public final class WildsenseAnimalRules {
     public static boolean skipMovementGoals(Animal animal) {
         if (WildsenseConfig.respectLeashedAnimals && animal.isLeashed()) return true;
         if (WildsenseConfig.respectMountedAnimals && (animal.isPassenger() || animal.isVehicle())) return true;
+        if (WildsenseConfig.respectNamedAnimals && animal.hasCustomName()) return true;
         return WildsenseConfig.respectBreedingAnimals && animal.isInLove();
     }
 }

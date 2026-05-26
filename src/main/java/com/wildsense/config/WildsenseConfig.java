@@ -24,6 +24,7 @@ public final class WildsenseConfig {
     public static boolean respectLeashedAnimals = true;
     public static boolean respectMountedAnimals = true;
     public static boolean respectBreedingAnimals = true;
+    public static boolean respectNamedAnimals = true;
 
     public static int fullAiRange = 48;
     public static int simpleAiRange = 96;
@@ -183,6 +184,7 @@ public final class WildsenseConfig {
         respectLeashedAnimals = bool(properties, "respectLeashedAnimals", respectLeashedAnimals);
         respectMountedAnimals = bool(properties, "respectMountedAnimals", respectMountedAnimals);
         respectBreedingAnimals = bool(properties, "respectBreedingAnimals", respectBreedingAnimals);
+        respectNamedAnimals = bool(properties, "respectNamedAnimals", respectNamedAnimals);
 
         fullAiRange = integer(properties, "fullAiRange", fullAiRange);
         simpleAiRange = integer(properties, "simpleAiRange", simpleAiRange);
@@ -247,6 +249,7 @@ public final class WildsenseConfig {
         properties.setProperty("respectLeashedAnimals", Boolean.toString(respectLeashedAnimals));
         properties.setProperty("respectMountedAnimals", Boolean.toString(respectMountedAnimals));
         properties.setProperty("respectBreedingAnimals", Boolean.toString(respectBreedingAnimals));
+        properties.setProperty("respectNamedAnimals", Boolean.toString(respectNamedAnimals));
         properties.setProperty("fullAiRange", Integer.toString(fullAiRange));
         properties.setProperty("simpleAiRange", Integer.toString(simpleAiRange));
         properties.setProperty("aiLodCacheTicks", Integer.toString(aiLodCacheTicks));
