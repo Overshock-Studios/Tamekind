@@ -1,6 +1,7 @@
 package com.wildsense.ai;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ public final class AnimalMemory {
     private static final String Z = "Z";
     private static final String UNTIL = "Until";
     private static final String SCORE = "Score";
+    private static final String PLAYER = "Player";
 
     private Vec3 dangerPos;
     private long dangerUntil;
@@ -72,35 +74,31 @@ public final class AnimalMemory {
         }
     }
 
-    public CompoundTag save() {
-        CompoundTag root = new CompoundTag();
+    public void save(ValueOutput output) {
         if (dangerPos != null) {
-            CompoundTag danger = new CompoundTag();
+            ValueOutput danger = output.child(DANGER);
             danger.putDouble(X, dangerPos.x);
             danger.putDouble(Y, dangerPos.y);
             danger.putDouble(Z, dangerPos.z);
             danger.putLong(UNTIL, dangerUntil);
-            root.put(DANGER, danger);
         }
         if (!trustedPlayers.isEmpty()) {
-            CompoundTag trust = new CompoundTag();
+            ValueOutput.ValueOutputList trust = output.childrenList(TRUST);
             for (Map.Entry<UUID, TrustEntry> entry : trustedPlayers.entrySet()) {
-                CompoundTag saved = new CompoundTag();
+                ValueOutput saved = trust.addChild();
+                saved.putString(PLAYER, entry.getKey().toString());
                 saved.putDouble(SCORE, entry.getValue().score);
                 saved.putLong(UNTIL, entry.getValue().untilTick);
-                trust.put(entry.getKey().toString(), saved);
             }
-            root.put(TRUST, trust);
         }
-        return root;
     }
 
-    public void load(CompoundTag root, long gameTime) {
+    public void load(ValueInput input, long gameTime) {
         dangerPos = null;
         dangerUntil = 0L;
         trustedPlayers.clear();
 
-        CompoundTag danger = root.getCompoundOrEmpty(DANGER);
+        ValueInput danger = input.childOrEmpty(DANGER);
         long savedDangerUntil = danger.getLongOr(UNTIL, 0L);
         if (savedDangerUntil > gameTime) {
             dangerPos = new Vec3(
@@ -110,11 +108,9 @@ public final class AnimalMemory {
             dangerUntil = savedDangerUntil;
         }
 
-        CompoundTag trust = root.getCompoundOrEmpty(TRUST);
-        for (String key : trust.keySet()) {
+        for (ValueInput saved : input.childrenListOrEmpty(TRUST)) {
             try {
-                UUID uuid = UUID.fromString(key);
-                CompoundTag saved = trust.getCompoundOrEmpty(key);
+                UUID uuid = UUID.fromString(saved.getStringOr(PLAYER, ""));
                 double score = saved.getDoubleOr(SCORE, 0.0);
                 long until = saved.getLongOr(UNTIL, 0L);
                 if (score > 0.0 && until > gameTime) {
