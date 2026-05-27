@@ -1,14 +1,14 @@
-package com.wildsense.ai.goal;
+package com.tamekind.ai.goal;
 
-import com.wildsense.ai.AiLod;
-import com.wildsense.ai.AnimalMemory;
-import com.wildsense.ai.AnimalMemoryStore;
-import com.wildsense.ai.DangerBroadcaster;
-import com.wildsense.ai.HerdCoordinator;
-import com.wildsense.ai.ThreatScanner;
-import com.wildsense.ai.WildsenseAnimalRules;
-import com.wildsense.compat.WildsenseTags;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.ai.AiLod;
+import com.tamekind.ai.AnimalMemory;
+import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.ai.DangerBroadcaster;
+import com.tamekind.ai.HerdCoordinator;
+import com.tamekind.ai.ThreatScanner;
+import com.tamekind.ai.TamekindAnimalRules;
+import com.tamekind.compat.TamekindTags;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
@@ -20,23 +20,23 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 
-public final class WildPanicGoal extends Goal implements WildsenseGoal {
+public final class PanicGoal extends Goal implements TamekindGoal {
     private final Animal animal;
     private Vec3 danger;
 
-    public WildPanicGoal(Animal animal) {
+    public PanicGoal(Animal animal) {
         this.animal = animal;
         setFlags(EnumSet.of(Flag.MOVE));
     }
 
     @Override
     public boolean canUse() {
-        if (!WildsenseConfig.enabled || !WildsenseConfig.panicEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
-        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
+        if (!TamekindConfig.enabled || !TamekindConfig.panicEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
+        if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         AnimalMemory memory = AnimalMemoryStore.get(animal);
         memory.tick(animal.level().getGameTime());
-        double panicRadius = WildsenseConfig.panicRadius;
-        if (animal.isBaby()) panicRadius *= WildsenseConfig.babyPanicRadiusMultiplier;
+        double panicRadius = TamekindConfig.panicRadius;
+        if (animal.isBaby()) panicRadius *= TamekindConfig.babyPanicRadiusMultiplier;
         Entity threat = ThreatScanner.nearestThreat(animal, panicRadius);
         if (threat != null) {
             danger = threat.position();
@@ -59,10 +59,11 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
 
     @Override
     public void tick() {
-        if (animal.tickCount % 12 == 0) {
+        boolean stuck = animal.getNavigation().isDone();
+        if (stuck || animal.tickCount % 40 == 0) {
             act();
         }
-        if (WildsenseConfig.stampedeEnabled && HerdCoordinator.herdSize(animal) >= WildsenseConfig.minStampedeHerdSize) {
+        if (TamekindConfig.stampedeEnabled && HerdCoordinator.herdSize(animal) >= TamekindConfig.minStampedeHerdSize) {
             applyStampedeBump();
         }
     }
@@ -70,24 +71,24 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
     private void act() {
         if (danger == null) return;
         long now = animal.level().getGameTime();
-        if (WildsenseConfig.parentGuardEnabled
+        if (TamekindConfig.parentGuardEnabled
                 && !animal.isBaby()
                 && AnimalMemoryStore.get(animal).isGuarding(now)) {
             Animal baby = nearestSameTypeBaby();
             if (baby != null) {
-                animal.getNavigation().moveTo(baby, WildsenseConfig.panicSpeed);
+                animal.getNavigation().moveTo(baby, TamekindConfig.panicSpeed);
                 return;
             }
         }
         BlockPos escape = chooseEscapePos();
         if (escape == null) return;
-        double speed = WildsenseConfig.panicSpeed;
-        if (animal.isBaby()) speed *= WildsenseConfig.babyPanicSpeedMultiplier;
+        double speed = TamekindConfig.panicSpeed;
+        if (animal.isBaby()) speed *= TamekindConfig.babyPanicSpeedMultiplier;
         animal.getNavigation().moveTo(escape.getX() + 0.5, escape.getY(), escape.getZ() + 0.5, speed);
     }
 
     private Animal nearestSameTypeBaby() {
-        AABB box = animal.getBoundingBox().inflate(WildsenseConfig.parentGuardRadius);
+        AABB box = animal.getBoundingBox().inflate(TamekindConfig.parentGuardRadius);
         Animal best = null;
         double bestDist = Double.MAX_VALUE;
         for (Animal other : animal.level().getEntitiesOfClass(Animal.class, box,
@@ -110,10 +111,10 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
         Vec3 away = delta.normalize();
         BlockPos best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
-        int candidates = Math.max(1, WildsenseConfig.panicCandidateCount);
+        int candidates = Math.max(1, TamekindConfig.panicCandidateCount);
         for (int i = 0; i < candidates; i++) {
             double spread = (i == 0) ? 0.0 : (animal.getRandom().nextDouble() - 0.5) * 1.8;
-            double distance = WildsenseConfig.panicEscapeDistance * (0.75 + animal.getRandom().nextDouble() * 0.55);
+            double distance = TamekindConfig.panicEscapeDistance * (0.75 + animal.getRandom().nextDouble() * 0.55);
             Vec3 direction = rotateY(away, spread);
             Vec3 target = current.add(direction.scale(distance));
             BlockPos candidate = settleEscapePos(BlockPos.containing(target.x, target.y, target.z));
@@ -130,7 +131,7 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
     private BlockPos settleEscapePos(BlockPos start) {
         Level level = animal.level();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        for (int dy = 2; dy >= -WildsenseConfig.panicDropCheckDepth; dy--) {
+        for (int dy = 2; dy >= -TamekindConfig.panicDropCheckDepth; dy--) {
             cursor.set(start.getX(), start.getY() + dy, start.getZ());
             if (isSafeStandPos(level, cursor)) {
                 return cursor.immutable();
@@ -144,8 +145,8 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
         BlockState head = level.getBlockState(pos.above());
         BlockState ground = level.getBlockState(pos.below());
         if (!feet.isAir() || !head.isAir()) return false;
-        if (ground.isAir() || ground.is(WildsenseTags.AVOID_BLOCKS)) return false;
-        if (feet.is(WildsenseTags.AVOID_BLOCKS) || head.is(WildsenseTags.AVOID_BLOCKS)) return false;
+        if (ground.isAir() || ground.is(TamekindTags.AVOID_BLOCKS)) return false;
+        if (feet.is(TamekindTags.AVOID_BLOCKS) || head.is(TamekindTags.AVOID_BLOCKS)) return false;
         if (!feet.getFluidState().isEmpty() || !head.getFluidState().isEmpty()) return false;
         return true;
     }
@@ -158,7 +159,7 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
         double score = distanceFromDanger + alignment * 20.0;
         Level level = animal.level();
         if (level.canSeeSky(pos) && level.isRaining()) score -= 8.0;
-        if (level.getBlockState(pos.below()).is(WildsenseTags.GRAZING_BLOCKS)) score += 3.0;
+        if (level.getBlockState(pos.below()).is(TamekindTags.GRAZING_BLOCKS)) score += 3.0;
         if (!level.isBrightOutside()) {
             score += level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, pos) * 2.0;
         }
@@ -191,11 +192,11 @@ public final class WildPanicGoal extends Goal implements WildsenseGoal {
         AABB box = animal.getBoundingBox().inflate(0.45);
         Vec3 motion = animal.getDeltaMovement();
         if (motion.horizontalDistanceSqr() < 0.01) return;
-        double scale = 1.0 + Math.max(0, herdSize - WildsenseConfig.minStampedeHerdSize) * WildsenseConfig.stampedeHerdScaling;
-        Vec3 push = motion.normalize().scale(WildsenseConfig.stampedeKnockback * scale);
+        double scale = 1.0 + Math.max(0, herdSize - TamekindConfig.minStampedeHerdSize) * TamekindConfig.stampedeHerdScaling;
+        Vec3 push = motion.normalize().scale(TamekindConfig.stampedeKnockback * scale);
         for (Entity entity : animal.level().getEntities(animal, box, entity -> entity.isAlive() && entity.isPushable())) {
             if (entity.isPassenger() || entity.isVehicle()) continue;
-            if (entity instanceof Animal other && (other.isBaby() || WildsenseAnimalRules.skipMovementGoals(other))) continue;
+            if (entity instanceof Animal other && (other.isBaby() || TamekindAnimalRules.skipMovementGoals(other))) continue;
             entity.push(push.x, 0.08 * scale, push.z);
         }
     }

@@ -1,4 +1,4 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
 import net.minecraft.world.entity.animal.Animal;
 

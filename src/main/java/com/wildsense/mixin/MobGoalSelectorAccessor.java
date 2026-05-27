@@ -1,4 +1,4 @@
-package com.wildsense.mixin;
+package com.tamekind.mixin;
 
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -9,5 +9,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface MobGoalSelectorAccessor {
 
     @Accessor("goalSelector")
-    GoalSelector wildsense$goalSelector();
+    GoalSelector tamekind$goalSelector();
 }

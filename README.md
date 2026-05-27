@@ -1,8 +1,8 @@
-# Wildsense
+# Tamekind
 
 **A vanilla+ passive mob AI overhaul for animals that feel aware of the world.**
 
-Wildsense is the passive-side counterpart to hostile AI overhauls: animals should herd, flee intelligently, seek habitats, remember danger, and create living-world behavior without becoming noisy or overcomplicated.
+Tamekind is the passive-side counterpart to hostile AI overhauls: animals should herd, flee intelligently, seek habitats, remember danger, and create living-world behavior without becoming noisy or overcomplicated.
 
 ## Feature Ideas
 
@@ -21,7 +21,7 @@ Wildsense is the passive-side counterpart to hostile AI overhauls: animals shoul
 
 ## Design Pillars
 
-- **Performance first.** Passive mobs are numerous, so complex behavior should use AI level of detail: full Wildsense logic near active players, cheaper herd updates at medium range, and vanilla/simple behavior when far away.
+- **Performance first.** Passive mobs are numerous, so complex behavior should use AI level of detail: full Tamekind logic near active players, cheaper herd updates at medium range, and vanilla/simple behavior when far away.
 - **Shared herd decisions.** Herd leaders should make expensive pathing and habitat decisions where possible, while followers use cheap local steering, spacing, and leader trail following.
 - **Data-driven compatibility.** Herdable animals, predators, feared events, comfort blocks, shelters, grazing blocks, and biome preferences should be driven by tags so datapacks and modpacks can patch in modded animals.
 - **Vanilla farms still work.** Pens, breeding, leads, boats, minecarts, name tags, and player-built farms should remain predictable unless a config profile deliberately makes animals more independent.

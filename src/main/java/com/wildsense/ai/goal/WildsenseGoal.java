@@ -1,4 +1,4 @@
-package com.wildsense.ai.goal;
+package com.tamekind.ai.goal;
 
-public interface WildsenseGoal {
+public interface TamekindGoal {
 }

@@ -1,13 +1,13 @@
-package com.wildsense.compat;
+package com.tamekind.compat;
 
-import com.wildsense.WildsenseMod;
+import com.tamekind.TamekindMod;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 
-public final class WildsenseTags {
+public final class TamekindTags {
     public static final TagKey<EntityType<?>> HERDABLE = entity("herdable");
     public static final TagKey<EntityType<?>> PREDATORS = entity("predators");
     public static final TagKey<EntityType<?>> DISABLED = entity("disabled");
@@ -18,14 +18,14 @@ public final class WildsenseTags {
     public static final TagKey<Block> COMFORT_BLOCKS = block("comfort_blocks");
     public static final TagKey<Block> SOFT_AVOID_BLOCKS = block("soft_avoid_blocks");
 
-    private WildsenseTags() {
+    private TamekindTags() {
     }
 
     private static TagKey<EntityType<?>> entity(String path) {
-        return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(WildsenseMod.MOD_ID, path));
+        return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(TamekindMod.MOD_ID, path));
     }
 
     private static TagKey<Block> block(String path) {
-        return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(WildsenseMod.MOD_ID, path));
+        return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(TamekindMod.MOD_ID, path));
     }
 }

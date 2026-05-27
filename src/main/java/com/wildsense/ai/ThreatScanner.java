@@ -1,8 +1,8 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
-import com.wildsense.WildsenseMod;
-import com.wildsense.compat.WildsenseTags;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.TamekindMod;
+import com.tamekind.compat.TamekindTags;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -27,7 +27,7 @@ public final class ThreatScanner {
         Identifier preyId = BuiltInRegistries.ENTITY_TYPE.getKey(prey.getType());
         return PREY_TAG_CACHE.computeIfAbsent(preyId, id ->
                 TagKey.create(Registries.ENTITY_TYPE,
-                        Identifier.fromNamespaceAndPath(WildsenseMod.MOD_ID, "predators_of/" + id.getNamespace() + "/" + id.getPath())));
+                        Identifier.fromNamespaceAndPath(TamekindMod.MOD_ID, "predators_of/" + id.getNamespace() + "/" + id.getPath())));
     }
 
     public static Entity nearestThreat(Animal animal, double radius) {
@@ -51,13 +51,13 @@ public final class ThreatScanner {
                 && (tame.isTame() || tame.isOrderedToSit())) return false;
         var holder = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType());
         if (holder.is(predatorsOf(animal))) return true;
-        if (holder.is(WildsenseTags.PREDATORS)) return true;
+        if (holder.is(TamekindTags.PREDATORS)) return true;
         if (entity instanceof Player player) {
             long gameTime = animal.level().getGameTime();
-            double trust = WildsenseConfig.trustEnabled
+            double trust = TamekindConfig.trustEnabled
                     ? AnimalMemoryStore.get(animal).trustScore(player.getUUID(), gameTime)
                     : 0.0;
-            double fleeScale = 1.0 - trust * WildsenseConfig.trustedPlayerFleeReduction;
+            double fleeScale = 1.0 - trust * TamekindConfig.trustedPlayerFleeReduction;
             double fleeDistance = 6.0 * Math.max(0.2, fleeScale);
             return player.isSprinting() && player.distanceToSqr(animal) < fleeDistance * fleeDistance;
         }

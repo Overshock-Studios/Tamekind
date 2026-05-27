@@ -1,7 +1,7 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
-import com.wildsense.compat.WildsenseTags;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.compat.TamekindTags;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.Animal;
@@ -15,12 +15,12 @@ public final class HerdCoordinator {
     }
 
     public static boolean isHerdable(Animal animal) {
-        return BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(WildsenseTags.HERDABLE);
+        return BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.HERDABLE);
     }
 
     public static List<Animal> nearbyHerd(Animal animal) {
         if (!(animal.level() instanceof ServerLevel level) || !isHerdable(animal)) return List.of();
-        double radius = WildsenseConfig.herdSearchRadius;
+        double radius = TamekindConfig.herdSearchRadius;
         AABB box = animal.getBoundingBox().inflate(radius);
         return level.getEntitiesOfClass(Animal.class, box, other ->
                 other.isAlive() && other != animal && sameHerd(animal, other));

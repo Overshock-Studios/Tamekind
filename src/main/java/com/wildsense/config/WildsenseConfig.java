@@ -1,6 +1,6 @@
-package com.wildsense.config;
+package com.tamekind.config;
 
-import com.wildsense.WildsenseMod;
+import com.tamekind.TamekindMod;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-public final class WildsenseConfig {
+public final class TamekindConfig {
     public static boolean enabled = true;
     public static boolean herdEnabled = true;
     public static boolean alertEnabled = true;
@@ -65,6 +65,7 @@ public final class WildsenseConfig {
     public static double panicSpeed = 1.35;
     public static double babyPanicSpeedMultiplier = 0.75;
     public static double babyPanicRadiusMultiplier = 0.7;
+    public static volatile String activeProfile = "default";
     public static double herdFollowSpeed = 1.05;
     public static double babyAnchorSpeed = 1.2;
     public static double shelterSpeed = 1.0;
@@ -75,7 +76,7 @@ public final class WildsenseConfig {
     public static double herdTrustShareMultiplier = 0.35;
     public static double trustedPlayerFleeReduction = 0.65;
 
-    private WildsenseConfig() {
+    private TamekindConfig() {
     }
 
     public enum Profile {
@@ -96,6 +97,7 @@ public final class WildsenseConfig {
     }
 
     public static void applyProfile(Profile profile) {
+        activeProfile = profile.name().toLowerCase(java.util.Locale.ROOT);
         switch (profile) {
             case VANILLA_PLUS -> {
                 enabled = true;
@@ -160,16 +162,16 @@ public final class WildsenseConfig {
             try (InputStream in = Files.newInputStream(path)) {
                 properties.load(in);
             } catch (IOException e) {
-                WildsenseMod.LOGGER.warn("Failed to read {}, using defaults", path, e);
+                TamekindMod.LOGGER.warn("Failed to read {}, using defaults", path, e);
             }
         } else {
             try {
                 Files.createDirectories(path.getParent());
                 try (OutputStream out = Files.newOutputStream(path)) {
-                    properties.store(out, "Wildsense configuration");
+                    properties.store(out, "Tamekind configuration");
                 }
             } catch (IOException e) {
-                WildsenseMod.LOGGER.warn("Failed to create {}", path, e);
+                TamekindMod.LOGGER.warn("Failed to create {}", path, e);
             }
         }
 

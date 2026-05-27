@@ -1,12 +1,12 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
-import com.wildsense.compat.WildsenseTags;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.compat.TamekindTags;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.animal.Animal;
 
-public final class WildsenseAnimalRules {
-    private WildsenseAnimalRules() {
+public final class TamekindAnimalRules {
+    private TamekindAnimalRules() {
     }
 
     private static final java.util.Set<net.minecraft.world.entity.EntityType<?>> RUNTIME_DISABLED =
@@ -14,7 +14,7 @@ public final class WildsenseAnimalRules {
 
     public static boolean isDisabled(Animal animal) {
         if (RUNTIME_DISABLED.contains(animal.getType())) return true;
-        return BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(WildsenseTags.DISABLED);
+        return BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.DISABLED);
     }
 
     public static boolean toggleRuntimeDisable(net.minecraft.world.entity.EntityType<?> type) {
@@ -25,9 +25,9 @@ public final class WildsenseAnimalRules {
 
     public static boolean skipMovementGoals(Animal animal) {
         if (isDisabled(animal)) return true;
-        if (WildsenseConfig.respectLeashedAnimals && animal.isLeashed()) return true;
-        if (WildsenseConfig.respectMountedAnimals && (animal.isPassenger() || animal.isVehicle())) return true;
-        if (WildsenseConfig.respectNamedAnimals && animal.hasCustomName()) return true;
-        return WildsenseConfig.respectBreedingAnimals && animal.isInLove();
+        if (TamekindConfig.respectLeashedAnimals && animal.isLeashed()) return true;
+        if (TamekindConfig.respectMountedAnimals && (animal.isPassenger() || animal.isVehicle())) return true;
+        if (TamekindConfig.respectNamedAnimals && animal.hasCustomName()) return true;
+        return TamekindConfig.respectBreedingAnimals && animal.isInLove();
     }
 }

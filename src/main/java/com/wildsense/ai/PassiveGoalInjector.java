@@ -1,16 +1,16 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
-import com.wildsense.ai.goal.AlertFreezeGoal;
-import com.wildsense.ai.goal.BabyAnchorGoal;
-import com.wildsense.ai.goal.DrinkGoal;
-import com.wildsense.ai.goal.GrazeRestGoal;
-import com.wildsense.ai.goal.HomeReturnGoal;
-import com.wildsense.ai.goal.HabitatShelterGoal;
-import com.wildsense.ai.goal.HerdFollowGoal;
-import com.wildsense.ai.goal.WildPanicGoal;
-import com.wildsense.ai.goal.WildsenseGoal;
-import com.wildsense.config.WildsenseConfig;
-import com.wildsense.mixin.MobGoalSelectorAccessor;
+import com.tamekind.ai.goal.AlertFreezeGoal;
+import com.tamekind.ai.goal.BabyAnchorGoal;
+import com.tamekind.ai.goal.DrinkGoal;
+import com.tamekind.ai.goal.GrazeRestGoal;
+import com.tamekind.ai.goal.HomeReturnGoal;
+import com.tamekind.ai.goal.HabitatShelterGoal;
+import com.tamekind.ai.goal.HerdFollowGoal;
+import com.tamekind.ai.goal.PanicGoal;
+import com.tamekind.ai.goal.TamekindGoal;
+import com.tamekind.config.TamekindConfig;
+import com.tamekind.mixin.MobGoalSelectorAccessor;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.network.chat.Component;
@@ -31,22 +31,22 @@ public final class PassiveGoalInjector {
         });
 
         UseEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
-            if (!WildsenseConfig.enabled) return InteractionResult.PASS;
+            if (!TamekindConfig.enabled) return InteractionResult.PASS;
             if (level.isClientSide()) return InteractionResult.PASS;
             if (entity instanceof Animal animal && animal.isFood(player.getItemInHand(hand))) {
                 if (shouldBlockCrowdedBreeding(animal)) {
-                    if (WildsenseConfig.breedingCrowdMessageEnabled) {
+                    if (TamekindConfig.breedingCrowdMessageEnabled) {
                         player.sendSystemMessage(Component.literal("This pen is too crowded for more breeding."));
                     }
                     return InteractionResult.FAIL;
                 }
-                if (!WildsenseConfig.trustEnabled) return InteractionResult.PASS;
-                long until = level.getGameTime() + WildsenseConfig.trustTicks;
-                AnimalMemoryStore.get(animal).addTrust(player.getUUID(), WildsenseConfig.trustPerFeeding, until);
+                if (!TamekindConfig.trustEnabled) return InteractionResult.PASS;
+                long until = level.getGameTime() + TamekindConfig.trustTicks;
+                AnimalMemoryStore.get(animal).addTrust(player.getUUID(), TamekindConfig.trustPerFeeding, until);
                 for (Animal herdMate : HerdCoordinator.nearbyHerd(animal)) {
                     AnimalMemoryStore.get(herdMate).addTrust(
                             player.getUUID(),
-                            WildsenseConfig.trustPerFeeding * WildsenseConfig.herdTrustShareMultiplier,
+                            TamekindConfig.trustPerFeeding * TamekindConfig.herdTrustShareMultiplier,
                             until);
                 }
             }
@@ -55,36 +55,36 @@ public final class PassiveGoalInjector {
     }
 
     private static boolean shouldBlockCrowdedBreeding(Animal animal) {
-        if (!WildsenseConfig.breedingCrowdControlEnabled || animal.isBaby()) return false;
-        int hard = WildsenseConfig.breedingCrowdHardLimit;
+        if (!TamekindConfig.breedingCrowdControlEnabled || animal.isBaby()) return false;
+        int hard = TamekindConfig.breedingCrowdHardLimit;
         if (hard <= 0) return false;
-        double radius = WildsenseConfig.breedingCrowdRadius;
+        double radius = TamekindConfig.breedingCrowdRadius;
         AABB box = animal.getBoundingBox().inflate(radius);
         int sameType = animal.level().getEntitiesOfClass(Animal.class, box,
                 other -> other.isAlive() && other.getType() == animal.getType()).size();
         if (sameType >= hard) return true;
-        int soft = Math.min(WildsenseConfig.breedingCrowdSoftLimit, hard);
+        int soft = Math.min(TamekindConfig.breedingCrowdSoftLimit, hard);
         if (soft <= 0 || sameType < soft) return false;
         double chance = (double) (sameType - soft) / Math.max(1, hard - soft);
         return animal.getRandom().nextDouble() < chance;
     }
 
     private static void inject(Animal animal) {
-        if (!WildsenseConfig.enabled || hasWildsenseGoal(animal)) return;
+        if (!TamekindConfig.enabled || hasTamekindGoal(animal)) return;
         MobGoalSelectorAccessor accessor = (MobGoalSelectorAccessor) animal;
-        accessor.wildsense$goalSelector().addGoal(0, new BabyAnchorGoal(animal));
-        accessor.wildsense$goalSelector().addGoal(1, new WildPanicGoal(animal));
-        accessor.wildsense$goalSelector().addGoal(2, new AlertFreezeGoal(animal));
-        accessor.wildsense$goalSelector().addGoal(5, new HabitatShelterGoal(animal));
-        accessor.wildsense$goalSelector().addGoal(6, new HerdFollowGoal(animal));
-        accessor.wildsense$goalSelector().addGoal(8, new GrazeRestGoal(animal));
-        accessor.wildsense$goalSelector().addGoal(9, new DrinkGoal(animal));
-        accessor.wildsense$goalSelector().addGoal(10, new HomeReturnGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(0, new BabyAnchorGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(1, new PanicGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(2, new AlertFreezeGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(5, new HabitatShelterGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(6, new HerdFollowGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(8, new GrazeRestGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(9, new DrinkGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(10, new HomeReturnGoal(animal));
     }
 
-    private static boolean hasWildsenseGoal(Animal animal) {
-        for (WrappedGoal goal : ((MobGoalSelectorAccessor) animal).wildsense$goalSelector().getAvailableGoals()) {
-            if (goal.getGoal() instanceof WildsenseGoal) return true;
+    private static boolean hasTamekindGoal(Animal animal) {
+        for (WrappedGoal goal : ((MobGoalSelectorAccessor) animal).tamekind$goalSelector().getAvailableGoals()) {
+            if (goal.getGoal() instanceof TamekindGoal) return true;
         }
         return false;
     }

@@ -1,16 +1,16 @@
-package com.wildsense.ai.goal;
+package com.tamekind.ai.goal;
 
-import com.wildsense.ai.AiLod;
-import com.wildsense.ai.ThreatScanner;
-import com.wildsense.ai.WildsenseAnimalRules;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.ai.AiLod;
+import com.tamekind.ai.ThreatScanner;
+import com.tamekind.ai.TamekindAnimalRules;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
-public final class AlertFreezeGoal extends Goal implements WildsenseGoal {
+public final class AlertFreezeGoal extends Goal implements TamekindGoal {
     private final Animal animal;
     private Entity threat;
     private int alertTicks;
@@ -24,24 +24,26 @@ public final class AlertFreezeGoal extends Goal implements WildsenseGoal {
 
     @Override
     public boolean canUse() {
-        if (!WildsenseConfig.enabled || !WildsenseConfig.alertEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
-        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
+        if (!TamekindConfig.enabled || !TamekindConfig.alertEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
+        if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         if (animal.tickCount < nextAllowedTick) return false;
-        threat = ThreatScanner.nearestThreat(animal, WildsenseConfig.alertRadius);
+        threat = ThreatScanner.nearestThreat(animal, TamekindConfig.alertRadius);
         if (threat == null) return false;
-        return animal.distanceToSqr(threat) > WildsenseConfig.panicRadius * WildsenseConfig.panicRadius;
+        return animal.distanceToSqr(threat) > TamekindConfig.panicRadius * TamekindConfig.panicRadius;
     }
 
     @Override
     public boolean canContinueToUse() {
         return threat != null && threat.isAlive() && alertTicks > 0
-                && animal.distanceToSqr(threat) > WildsenseConfig.panicRadius * WildsenseConfig.panicRadius;
+                && animal.distanceToSqr(threat) > TamekindConfig.panicRadius * TamekindConfig.panicRadius;
     }
 
     @Override
     public void start() {
-        int rnd = Math.max(1, WildsenseConfig.alertFreezeRandomTicks);
-        alertTicks = WildsenseConfig.alertFreezeMinTicks + animal.getRandom().nextInt(rnd);
+        int rnd = Math.max(1, TamekindConfig.alertFreezeRandomTicks);
+        int min = TamekindConfig.alertFreezeMinTicks;
+        if (animal.isBaby()) { min = Math.max(5, min / 2); rnd = Math.max(1, rnd / 2); }
+        alertTicks = min + animal.getRandom().nextInt(rnd);
         initialTicks = alertTicks;
         animal.getNavigation().stop();
     }
@@ -60,7 +62,7 @@ public final class AlertFreezeGoal extends Goal implements WildsenseGoal {
                         animal.getX() + away.x,
                         animal.getY(),
                         animal.getZ() + away.z,
-                        WildsenseConfig.alertDriftSpeed);
+                        TamekindConfig.alertDriftSpeed);
             }
         }
     }

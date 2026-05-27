@@ -1,6 +1,6 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.phys.AABB;
@@ -12,18 +12,18 @@ public final class DangerBroadcaster {
 
     public static void rememberAndSpread(Animal source, Vec3 danger) {
         long now = source.level().getGameTime();
-        long until = now + WildsenseConfig.memoryTicks;
+        long until = now + TamekindConfig.memoryTicks;
         AnimalMemory memory = AnimalMemoryStore.get(source);
         memory.rememberDanger(danger, until);
-        if (!memory.canSpreadDanger(now, WildsenseConfig.herdDangerSpreadCooldownTicks)) {
+        if (!memory.canSpreadDanger(now, TamekindConfig.herdDangerSpreadCooldownTicks)) {
             return;
         }
         spread(source, danger, until);
     }
 
     private static void spread(Animal source, Vec3 danger, long until) {
-        if (!WildsenseConfig.herdEnabled || !(source.level() instanceof ServerLevel level)) return;
-        double radius = WildsenseConfig.herdSearchRadius;
+        if (!TamekindConfig.herdEnabled || !(source.level() instanceof ServerLevel level)) return;
+        double radius = TamekindConfig.herdSearchRadius;
         AABB box = source.getBoundingBox().inflate(radius);
         for (Animal herdMate : level.getEntitiesOfClass(Animal.class, box, other ->
                 other.isAlive() && other != source && other.getType() == source.getType())) {

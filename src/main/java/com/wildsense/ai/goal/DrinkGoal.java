@@ -1,11 +1,11 @@
-package com.wildsense.ai.goal;
+package com.tamekind.ai.goal;
 
-import com.wildsense.ai.AiLod;
-import com.wildsense.ai.AnimalMemoryStore;
-import com.wildsense.ai.HerdCoordinator;
-import com.wildsense.ai.WildsenseAnimalRules;
-import com.wildsense.compat.WildsenseTags;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.ai.AiLod;
+import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.ai.HerdCoordinator;
+import com.tamekind.ai.TamekindAnimalRules;
+import com.tamekind.compat.TamekindTags;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.EnumSet;
 
-public final class DrinkGoal extends Goal implements WildsenseGoal {
+public final class DrinkGoal extends Goal implements TamekindGoal {
     private final Animal animal;
     private BlockPos waterEdge;
     private int nextTryTick;
@@ -26,12 +26,12 @@ public final class DrinkGoal extends Goal implements WildsenseGoal {
 
     @Override
     public boolean canUse() {
-        if (!WildsenseConfig.enabled || !WildsenseConfig.dailyRhythmEnabled) return false;
-        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
+        if (!TamekindConfig.enabled || !TamekindConfig.dailyRhythmEnabled) return false;
+        if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         if (AiLod.forAnimal(animal) != AiLod.FULL) return false;
         if (animal.tickCount < nextTryTick) return false;
-        nextTryTick = animal.tickCount + WildsenseConfig.drinkMinIntervalTicks
-                + animal.getRandom().nextInt(Math.max(1, WildsenseConfig.drinkMinIntervalTicks));
+        nextTryTick = animal.tickCount + TamekindConfig.drinkMinIntervalTicks
+                + animal.getRandom().nextInt(Math.max(1, TamekindConfig.drinkMinIntervalTicks));
         if (AnimalMemoryStore.get(animal).dangerPos(animal.level().getGameTime()) != null) return false;
         if (animal.isInLove() || animal.isBaby()) return false;
         if (animal.isInWater()) return false;
@@ -60,7 +60,7 @@ public final class DrinkGoal extends Goal implements WildsenseGoal {
 
     @Override
     public void start() {
-        drinkTicks = WildsenseConfig.drinkDurationTicks + animal.getRandom().nextInt(Math.max(1, WildsenseConfig.drinkDurationTicks));
+        drinkTicks = TamekindConfig.drinkDurationTicks + animal.getRandom().nextInt(Math.max(1, TamekindConfig.drinkDurationTicks));
         if (animal.blockPosition().distSqr(waterEdge) > 3.0) {
             animal.getNavigation().moveTo(waterEdge.getX() + 0.5, waterEdge.getY(), waterEdge.getZ() + 0.5, 0.85);
         } else {
@@ -84,7 +84,7 @@ public final class DrinkGoal extends Goal implements WildsenseGoal {
     private BlockPos findWaterEdge(Level level, BlockPos origin) {
         BlockPos best = null;
         long bestDist = Long.MAX_VALUE;
-        int radius = WildsenseConfig.drinkSearchRadius;
+        int radius = TamekindConfig.drinkSearchRadius;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
@@ -105,11 +105,11 @@ public final class DrinkGoal extends Goal implements WildsenseGoal {
     private boolean isStandableNextToWater(Level level, BlockPos pos) {
         if (!level.getBlockState(pos).isAir()) return false;
         if (!level.getBlockState(pos.above()).isAir()) return false;
-        if (level.getBlockState(pos.below()).is(WildsenseTags.AVOID_BLOCKS)) return false;
+        if (level.getBlockState(pos.below()).is(TamekindTags.AVOID_BLOCKS)) return false;
         if (!level.getBlockState(pos.below()).isSolid()) return false;
-        return level.getBlockState(pos.north()).is(WildsenseTags.WATER_BLOCKS)
-                || level.getBlockState(pos.south()).is(WildsenseTags.WATER_BLOCKS)
-                || level.getBlockState(pos.east()).is(WildsenseTags.WATER_BLOCKS)
-                || level.getBlockState(pos.west()).is(WildsenseTags.WATER_BLOCKS);
+        return level.getBlockState(pos.north()).is(TamekindTags.WATER_BLOCKS)
+                || level.getBlockState(pos.south()).is(TamekindTags.WATER_BLOCKS)
+                || level.getBlockState(pos.east()).is(TamekindTags.WATER_BLOCKS)
+                || level.getBlockState(pos.west()).is(TamekindTags.WATER_BLOCKS);
     }
 }

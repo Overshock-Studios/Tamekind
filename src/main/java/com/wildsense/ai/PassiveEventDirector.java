@@ -1,6 +1,6 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.config.TamekindConfig;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -21,18 +21,18 @@ public final class PassiveEventDirector {
 
     private static void afterDamage(LivingEntity entity, DamageSource source,
                                     float baseDamageTaken, float damageTaken, boolean blocked) {
-        if (!WildsenseConfig.enabled || !(entity instanceof Animal animal)) return;
+        if (!TamekindConfig.enabled || !(entity instanceof Animal animal)) return;
         if (damageTaken <= 0.0f && !source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) return;
         Vec3 danger = dangerPosition(animal, source);
         DangerBroadcaster.rememberAndSpread(animal, danger);
         Entity attacker = source.getEntity();
-        if (attacker instanceof Player player && WildsenseConfig.trustEnabled) {
-            AnimalMemoryStore.get(animal).removeTrust(player.getUUID(), WildsenseConfig.trustLossPerHit);
+        if (attacker instanceof Player player && TamekindConfig.trustEnabled) {
+            AnimalMemoryStore.get(animal).removeTrust(player.getUUID(), TamekindConfig.trustLossPerHit);
         }
-        if (animal.isBaby() && WildsenseConfig.parentGuardEnabled
+        if (animal.isBaby() && TamekindConfig.parentGuardEnabled
                 && animal.level() instanceof ServerLevel level) {
-            long until = level.getGameTime() + WildsenseConfig.parentGuardTicks;
-            AABB box = animal.getBoundingBox().inflate(WildsenseConfig.parentGuardRadius);
+            long until = level.getGameTime() + TamekindConfig.parentGuardTicks;
+            AABB box = animal.getBoundingBox().inflate(TamekindConfig.parentGuardRadius);
             for (Animal adult : level.getEntitiesOfClass(Animal.class, box,
                     other -> other.isAlive() && !other.isBaby() && other.getType() == animal.getType())) {
                 AnimalMemoryStore.get(adult).markGuarding(until);

@@ -1,16 +1,16 @@
-package com.wildsense.ai.goal;
+package com.tamekind.ai.goal;
 
-import com.wildsense.ai.AiLod;
-import com.wildsense.ai.AnimalMemoryStore;
-import com.wildsense.ai.HerdCoordinator;
-import com.wildsense.ai.WildsenseAnimalRules;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.ai.AiLod;
+import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.ai.HerdCoordinator;
+import com.tamekind.ai.TamekindAnimalRules;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
-public final class HerdFollowGoal extends Goal implements WildsenseGoal {
+public final class HerdFollowGoal extends Goal implements TamekindGoal {
     private final Animal animal;
     private Animal leader;
 
@@ -21,8 +21,8 @@ public final class HerdFollowGoal extends Goal implements WildsenseGoal {
 
     @Override
     public boolean canUse() {
-        if (!WildsenseConfig.enabled || !WildsenseConfig.herdEnabled) return false;
-        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
+        if (!TamekindConfig.enabled || !TamekindConfig.herdEnabled) return false;
+        if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         AiLod lod = AiLod.forAnimal(animal);
         if (lod == AiLod.SLEEP || !HerdCoordinator.isHerdable(animal)) return false;
         leader = HerdCoordinator.leaderFor(animal);
@@ -39,13 +39,13 @@ public final class HerdFollowGoal extends Goal implements WildsenseGoal {
 
     @Override
     public void start() {
-        animal.getNavigation().moveTo(leader, WildsenseConfig.herdFollowSpeed);
+        animal.getNavigation().moveTo(leader, TamekindConfig.herdFollowSpeed);
     }
 
     @Override
     public void tick() {
         if (leader != null && animal.tickCount % 20 == 0) {
-            animal.getNavigation().moveTo(leader, WildsenseConfig.herdFollowSpeed);
+            animal.getNavigation().moveTo(leader, TamekindConfig.herdFollowSpeed);
         }
     }
 

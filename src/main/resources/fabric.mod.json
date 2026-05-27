@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "wildsense",
+  "id": "tamekind",
   "version": "${version}",
-  "name": "Wildsense",
+  "name": "Tamekind",
   "description": "A vanilla+ passive mob AI overhaul focused on herds, habitats, survival instincts, and believable animal behavior.",
   "authors": [
     "Divesh Gupta"
@@ -12,11 +12,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.wildsense.WildsenseMod"
+      "com.tamekind.TamekindMod"
     ]
   },
   "mixins": [
-    "wildsense.mixins.json"
+    "tamekind.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.19.2",

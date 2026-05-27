@@ -1,6 +1,6 @@
-package com.wildsense.ai;
+package com.tamekind.ai;
 
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.Animal;
@@ -23,7 +23,7 @@ public enum AiLod {
             return cached.lod;
         }
         AiLod lod = compute(animal, level);
-        int cacheTicks = Math.max(1, WildsenseConfig.aiLodCacheTicks);
+        int cacheTicks = Math.max(1, TamekindConfig.aiLodCacheTicks);
         int jitter = Math.floorMod(animal.getId(), cacheTicks);
         CACHE.put(animal, new CachedLod(lod, now + cacheTicks + jitter));
         return lod;
@@ -32,7 +32,7 @@ public enum AiLod {
     public static AiLod computeFresh(Animal animal) {
         if (!(animal.level() instanceof ServerLevel level)) return SLEEP;
         AiLod lod = compute(animal, level);
-        CACHE.put(animal, new CachedLod(lod, level.getGameTime() + Math.max(1, WildsenseConfig.aiLodCacheTicks)));
+        CACHE.put(animal, new CachedLod(lod, level.getGameTime() + Math.max(1, TamekindConfig.aiLodCacheTicks)));
         return lod;
     }
 
@@ -42,9 +42,9 @@ public enum AiLod {
             if (player.isSpectator()) continue;
             nearest = Math.min(nearest, player.distanceToSqr(animal));
         }
-        int full = WildsenseConfig.fullAiRange;
+        int full = TamekindConfig.fullAiRange;
         if (nearest <= (double) full * full) return FULL;
-        int simple = WildsenseConfig.simpleAiRange;
+        int simple = TamekindConfig.simpleAiRange;
         if (nearest <= (double) simple * simple) return SIMPLE;
         return SLEEP;
     }

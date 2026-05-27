@@ -1,7 +1,7 @@
-package com.wildsense.mixin;
+package com.tamekind.mixin;
 
-import com.wildsense.ai.AnimalMemoryStore;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -13,18 +13,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Animal.class)
 public abstract class AnimalMemoryMixin {
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
-    private void wildsense$saveMemory(ValueOutput output, CallbackInfo ci) {
-        if (!WildsenseConfig.enabled) return;
+    private void tamekind$saveMemory(ValueOutput output, CallbackInfo ci) {
+        if (!TamekindConfig.enabled) return;
         Animal animal = (Animal) (Object) this;
-        AnimalMemoryStore.get(animal).save(output.child("WildsenseMemory"));
+        AnimalMemoryStore.get(animal).save(output.child("TamekindMemory"));
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-    private void wildsense$loadMemory(ValueInput input, CallbackInfo ci) {
-        if (!WildsenseConfig.enabled) return;
+    private void tamekind$loadMemory(ValueInput input, CallbackInfo ci) {
+        if (!TamekindConfig.enabled) return;
         Animal animal = (Animal) (Object) this;
         AnimalMemoryStore.get(animal).load(
-                input.childOrEmpty("WildsenseMemory"),
+                input.childOrEmpty("TamekindMemory"),
                 animal.level().getGameTime());
     }
 }

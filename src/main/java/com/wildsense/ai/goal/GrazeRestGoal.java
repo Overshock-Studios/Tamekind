@@ -1,11 +1,11 @@
-package com.wildsense.ai.goal;
+package com.tamekind.ai.goal;
 
-import com.wildsense.ai.AiLod;
-import com.wildsense.ai.AnimalMemoryStore;
-import com.wildsense.ai.HerdCoordinator;
-import com.wildsense.ai.WildsenseAnimalRules;
-import com.wildsense.compat.WildsenseTags;
-import com.wildsense.config.WildsenseConfig;
+import com.tamekind.ai.AiLod;
+import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.ai.HerdCoordinator;
+import com.tamekind.ai.TamekindAnimalRules;
+import com.tamekind.compat.TamekindTags;
+import com.tamekind.config.TamekindConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.EnumSet;
 
-public final class GrazeRestGoal extends Goal implements WildsenseGoal {
+public final class GrazeRestGoal extends Goal implements TamekindGoal {
     private final Animal animal;
     private BlockPos grazingSpot;
     private int nextTryTick;
@@ -26,12 +26,12 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
 
     @Override
     public boolean canUse() {
-        if (!WildsenseConfig.enabled || !WildsenseConfig.dailyRhythmEnabled) return false;
-        if (WildsenseAnimalRules.skipMovementGoals(animal)) return false;
+        if (!TamekindConfig.enabled || !TamekindConfig.dailyRhythmEnabled) return false;
+        if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         if (AiLod.forAnimal(animal) != AiLod.FULL) return false;
         if (animal.tickCount < nextTryTick) return false;
-        nextTryTick = animal.tickCount + WildsenseConfig.grazeMinIntervalTicks
-                + animal.getRandom().nextInt(Math.max(1, WildsenseConfig.grazeMinIntervalTicks));
+        nextTryTick = animal.tickCount + TamekindConfig.grazeMinIntervalTicks
+                + animal.getRandom().nextInt(Math.max(1, TamekindConfig.grazeMinIntervalTicks));
         if (AnimalMemoryStore.get(animal).dangerPos(animal.level().getGameTime()) != null) return false;
         if (animal.isInLove() || animal.isBaby()) return false;
         long now = animal.level().getGameTime();
@@ -59,7 +59,7 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
 
     @Override
     public void start() {
-        int base = WildsenseConfig.grazeDurationTicks;
+        int base = TamekindConfig.grazeDurationTicks;
         if (!animal.level().isBrightOutside()) base *= 3;
         grazeTicks = base + animal.getRandom().nextInt(Math.max(1, base));
         if (animal.blockPosition().distSqr(grazingSpot) > 3.0) {
@@ -90,7 +90,7 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
         boolean night = !level.isBrightOutside();
         BlockPos best = null;
         long bestDist = Long.MAX_VALUE;
-        int radius = WildsenseConfig.grazeSearchRadius;
+        int radius = TamekindConfig.grazeSearchRadius;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
@@ -98,8 +98,8 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
                     cursor.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
                     if (!isRestStandPos(level, cursor)) continue;
                     long dist = (long) dx * dx + (long) dz * dz + (long) dy * dy * 3L;
-                    if (level.getBlockState(cursor).is(WildsenseTags.SOFT_AVOID_BLOCKS)) dist += 12;
-                    if (night && level.getBlockState(cursor.below()).is(WildsenseTags.COMFORT_BLOCKS)) dist -= 10;
+                    if (level.getBlockState(cursor).is(TamekindTags.SOFT_AVOID_BLOCKS)) dist += 12;
+                    if (night && level.getBlockState(cursor.below()).is(TamekindTags.COMFORT_BLOCKS)) dist -= 10;
                     if (dist < bestDist) {
                         bestDist = dist;
                         best = cursor.immutable();
@@ -113,8 +113,8 @@ public final class GrazeRestGoal extends Goal implements WildsenseGoal {
     private boolean isRestStandPos(Level level, BlockPos pos) {
         if (!level.getBlockState(pos).isAir()) return false;
         if (!level.getBlockState(pos.above()).isAir()) return false;
-        if (level.getBlockState(pos.below()).is(WildsenseTags.AVOID_BLOCKS)) return false;
-        return level.getBlockState(pos.below()).is(WildsenseTags.GRAZING_BLOCKS)
-                || level.getBlockState(pos.below()).is(WildsenseTags.COMFORT_BLOCKS);
+        if (level.getBlockState(pos.below()).is(TamekindTags.AVOID_BLOCKS)) return false;
+        return level.getBlockState(pos.below()).is(TamekindTags.GRAZING_BLOCKS)
+                || level.getBlockState(pos.below()).is(TamekindTags.COMFORT_BLOCKS);
     }
 }
