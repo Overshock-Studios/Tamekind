@@ -66,6 +66,11 @@ public final class HabitatShelterGoal extends Goal implements TamekindGoal {
             }
             return true;
         }
+        if (TamekindConfig.scaredNoCoverEnabled
+                && AnimalMemoryStore.get(animal).dangerPos(now) == null) {
+            AnimalMemoryStore.get(animal).rememberDanger(
+                    animal.position(), now + TamekindConfig.scaredNoCoverDurationTicks);
+        }
         return false;
     }
 

@@ -36,6 +36,8 @@ public final class PassiveGoalInjector {
             if (entity instanceof Animal animal) {
                 inject(animal);
                 applySizeVariance(animal);
+            } else if (entity instanceof net.minecraft.world.entity.LightningBolt bolt) {
+                broadcastLightning(bolt, level);
             }
         });
 
@@ -77,6 +79,17 @@ public final class PassiveGoalInjector {
         return id.contains("horse") || id.equals("donkey") || id.equals("mule")
                 || id.equals("llama") || id.equals("trader_llama") || id.equals("camel")
                 || id.equals("pig") || id.equals("strider");
+    }
+
+    private static void broadcastLightning(net.minecraft.world.entity.LightningBolt bolt,
+                                           net.minecraft.server.level.ServerLevel level) {
+        if (!TamekindConfig.enabled || !TamekindConfig.lightningPanicEnabled) return;
+        double radius = TamekindConfig.lightningPanicRadius;
+        AABB box = bolt.getBoundingBox().inflate(radius);
+        net.minecraft.world.phys.Vec3 source = bolt.position();
+        for (Animal nearby : level.getEntitiesOfClass(Animal.class, box, a -> a.isAlive())) {
+            DangerBroadcaster.rememberAndSpread(nearby, source);
+        }
     }
 
     private static void applySizeVariance(Animal animal) {

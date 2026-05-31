@@ -278,6 +278,10 @@ public final class TamekindConfig {
         idleBondRadius = integer(properties, "idleBondRadius", idleBondRadius);
         sizeVarianceEnabled = bool(properties, "sizeVarianceEnabled", sizeVarianceEnabled);
         sizeVarianceRange = decimal(properties, "sizeVarianceRange", sizeVarianceRange);
+        scaredNoCoverEnabled = bool(properties, "scaredNoCoverEnabled", scaredNoCoverEnabled);
+        scaredNoCoverDurationTicks = integer(properties, "scaredNoCoverDurationTicks", scaredNoCoverDurationTicks);
+        lightningPanicEnabled = bool(properties, "lightningPanicEnabled", lightningPanicEnabled);
+        lightningPanicRadius = integer(properties, "lightningPanicRadius", lightningPanicRadius);
         mountFoodTrustMultiplier = decimal(properties, "mountFoodTrustMultiplier", mountFoodTrustMultiplier);
         calmerBreedingTrustThreshold = decimal(properties, "calmerBreedingTrustThreshold", calmerBreedingTrustThreshold);
         calmerBreedingLoveTicks = integer(properties, "calmerBreedingLoveTicks", calmerBreedingLoveTicks);
@@ -461,6 +465,16 @@ public final class TamekindConfig {
                 sizeVarianceEnabled=%s
                 # Maximum +/- scale variance (e.g. 0.10 = 90%%..110%%).
                 sizeVarianceRange=%s
+
+                # ── Storm reactions ───────────────────────────────────────────────
+                # If true, animals that need cover but can't find any briefly panic in place.
+                scaredNoCoverEnabled=%s
+                # Duration of the "no cover" scared memory in ticks.
+                scaredNoCoverDurationTicks=%d
+                # If true, lightning strikes spread danger to nearby animals.
+                lightningPanicEnabled=%s
+                # Block radius around a lightning bolt that gets the danger memory.
+                lightningPanicRadius=%d
                 """.formatted(
                         enabled, herdEnabled, alertEnabled, panicEnabled, habitatEnabled, trustEnabled,
                         stampedeEnabled, babyAnchoringEnabled, breedingCrowdControlEnabled,
@@ -496,7 +510,9 @@ public final class TamekindConfig {
                         followTrustedEnabled, followTrustedRadius,
                         Double.toString(followTrustedMinTrust), Double.toString(followTrustedSpeed),
                         Double.toString(mountFoodTrustMultiplier),
-                        sizeVarianceEnabled, Double.toString(sizeVarianceRange));
+                        sizeVarianceEnabled, Double.toString(sizeVarianceRange),
+                        scaredNoCoverEnabled, scaredNoCoverDurationTicks,
+                        lightningPanicEnabled, lightningPanicRadius);
     }
 
     private static boolean bool(Properties properties, String key, boolean fallback) {
