@@ -4,7 +4,7 @@ import com.tamekind.TamekindMod;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -89,6 +89,10 @@ public final class TamekindConfig {
     public static int idleBondRadius = 8;
     public static boolean sizeVarianceEnabled = true;
     public static double sizeVarianceRange = 0.10;
+    public static boolean scaredNoCoverEnabled = true;
+    public static int scaredNoCoverDurationTicks = 60;
+    public static boolean lightningPanicEnabled = true;
+    public static int lightningPanicRadius = 32;
     public static double mountFoodTrustMultiplier = 4.0;
     public static double calmerBreedingTrustThreshold = 0.4;
     public static int calmerBreedingLoveTicks = 1200;
@@ -180,7 +184,7 @@ public final class TamekindConfig {
     }
 
     public static void load(Path path) {
-        Properties properties = defaults();
+        Properties properties = new Properties();
         if (Files.exists(path)) {
             try (InputStream in = Files.newInputStream(path)) {
                 properties.load(in);
@@ -190,9 +194,7 @@ public final class TamekindConfig {
         } else {
             try {
                 Files.createDirectories(path.getParent());
-                try (OutputStream out = Files.newOutputStream(path)) {
-                    properties.store(out, "Tamekind configuration");
-                }
+                Files.writeString(path, toPropertiesText(), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 TamekindMod.LOGGER.warn("Failed to create {}", path, e);
             }
@@ -287,94 +289,214 @@ public final class TamekindConfig {
         trustedPlayerFleeReduction = decimal(properties, "trustedPlayerFleeReduction", trustedPlayerFleeReduction);
     }
 
-    private static Properties defaults() {
-        Properties properties = new Properties();
-        properties.setProperty("enabled", Boolean.toString(enabled));
-        properties.setProperty("herdEnabled", Boolean.toString(herdEnabled));
-        properties.setProperty("alertEnabled", Boolean.toString(alertEnabled));
-        properties.setProperty("panicEnabled", Boolean.toString(panicEnabled));
-        properties.setProperty("habitatEnabled", Boolean.toString(habitatEnabled));
-        properties.setProperty("trustEnabled", Boolean.toString(trustEnabled));
-        properties.setProperty("stampedeEnabled", Boolean.toString(stampedeEnabled));
-        properties.setProperty("babyAnchoringEnabled", Boolean.toString(babyAnchoringEnabled));
-        properties.setProperty("breedingCrowdControlEnabled", Boolean.toString(breedingCrowdControlEnabled));
-        properties.setProperty("breedingCrowdMessageEnabled", Boolean.toString(breedingCrowdMessageEnabled));
-        properties.setProperty("dailyRhythmEnabled", Boolean.toString(dailyRhythmEnabled));
-        properties.setProperty("respectLeashedAnimals", Boolean.toString(respectLeashedAnimals));
-        properties.setProperty("respectMountedAnimals", Boolean.toString(respectMountedAnimals));
-        properties.setProperty("respectBreedingAnimals", Boolean.toString(respectBreedingAnimals));
-        properties.setProperty("respectNamedAnimals", Boolean.toString(respectNamedAnimals));
-        properties.setProperty("fullAiRange", Integer.toString(fullAiRange));
-        properties.setProperty("simpleAiRange", Integer.toString(simpleAiRange));
-        properties.setProperty("aiLodCacheTicks", Integer.toString(aiLodCacheTicks));
-        properties.setProperty("alertRadius", Integer.toString(alertRadius));
-        properties.setProperty("panicRadius", Integer.toString(panicRadius));
-        properties.setProperty("herdSearchRadius", Integer.toString(herdSearchRadius));
-        properties.setProperty("shelterSearchRadius", Integer.toString(shelterSearchRadius));
-        properties.setProperty("memoryTicks", Integer.toString(memoryTicks));
-        properties.setProperty("herdDangerSpreadCooldownTicks", Integer.toString(herdDangerSpreadCooldownTicks));
-        properties.setProperty("trustTicks", Integer.toString(trustTicks));
-        properties.setProperty("minStampedeHerdSize", Integer.toString(minStampedeHerdSize));
-        properties.setProperty("babyAnchorSearchRadius", Integer.toString(babyAnchorSearchRadius));
-        properties.setProperty("panicCandidateCount", Integer.toString(panicCandidateCount));
-        properties.setProperty("panicEscapeDistance", Integer.toString(panicEscapeDistance));
-        properties.setProperty("panicDropCheckDepth", Integer.toString(panicDropCheckDepth));
-        properties.setProperty("breedingCrowdRadius", Integer.toString(breedingCrowdRadius));
-        properties.setProperty("breedingCrowdHardLimit", Integer.toString(breedingCrowdHardLimit));
-        properties.setProperty("breedingCrowdSoftLimit", Integer.toString(breedingCrowdSoftLimit));
-        properties.setProperty("grazeSearchRadius", Integer.toString(grazeSearchRadius));
-        properties.setProperty("grazeMinIntervalTicks", Integer.toString(grazeMinIntervalTicks));
-        properties.setProperty("grazeDurationTicks", Integer.toString(grazeDurationTicks));
-        properties.setProperty("drinkSearchRadius", Integer.toString(drinkSearchRadius));
-        properties.setProperty("drinkMinIntervalTicks", Integer.toString(drinkMinIntervalTicks));
-        properties.setProperty("drinkDurationTicks", Integer.toString(drinkDurationTicks));
-        properties.setProperty("parentGuardTicks", Integer.toString(parentGuardTicks));
-        properties.setProperty("parentGuardRadius", Integer.toString(parentGuardRadius));
-        properties.setProperty("parentGuardEnabled", Boolean.toString(parentGuardEnabled));
-        properties.setProperty("homeReturnEnabled", Boolean.toString(homeReturnEnabled));
-        properties.setProperty("homeReturnMaxDistance", Integer.toString(homeReturnMaxDistance));
-        properties.setProperty("homeReturnMinDistance", Integer.toString(homeReturnMinDistance));
-        properties.setProperty("homeReturnIntervalTicks", Integer.toString(homeReturnIntervalTicks));
-        properties.setProperty("homeReturnSpeed", Double.toString(homeReturnSpeed));
-        properties.setProperty("alertFreezeMinTicks", Integer.toString(alertFreezeMinTicks));
-        properties.setProperty("alertFreezeRandomTicks", Integer.toString(alertFreezeRandomTicks));
-        properties.setProperty("alertDriftSpeed", Double.toString(alertDriftSpeed));
-        properties.setProperty("panicSpeed", Double.toString(panicSpeed));
-        properties.setProperty("babyPanicSpeedMultiplier", Double.toString(babyPanicSpeedMultiplier));
-        properties.setProperty("babyPanicRadiusMultiplier", Double.toString(babyPanicRadiusMultiplier));
-        properties.setProperty("herdFollowSpeed", Double.toString(herdFollowSpeed));
-        properties.setProperty("babyAnchorSpeed", Double.toString(babyAnchorSpeed));
-        properties.setProperty("shelterSpeed", Double.toString(shelterSpeed));
-        properties.setProperty("stampedeKnockback", Double.toString(stampedeKnockback));
-        properties.setProperty("stampedeHerdScaling", Double.toString(stampedeHerdScaling));
-        properties.setProperty("trustPerFeeding", Double.toString(trustPerFeeding));
-        properties.setProperty("trustLossPerHit", Double.toString(trustLossPerHit));
-        properties.setProperty("trustHitForgivenessThreshold", Double.toString(trustHitForgivenessThreshold));
-        properties.setProperty("lowHpThresholdFraction", Double.toString(lowHpThresholdFraction));
-        properties.setProperty("limpSpeedMultiplier", Double.toString(limpSpeedMultiplier));
-        properties.setProperty("followTrustedEnabled", Boolean.toString(followTrustedEnabled));
-        properties.setProperty("followTrustedRadius", Integer.toString(followTrustedRadius));
-        properties.setProperty("followTrustedMinTrust", Double.toString(followTrustedMinTrust));
-        properties.setProperty("followTrustedSpeed", Double.toString(followTrustedSpeed));
-        properties.setProperty("stampedeCropDamageEnabled", Boolean.toString(stampedeCropDamageEnabled));
-        properties.setProperty("stampedeCropDamageChance", Double.toString(stampedeCropDamageChance));
-        properties.setProperty("panicSoundEnabled", Boolean.toString(panicSoundEnabled));
-        properties.setProperty("panicSoundVolume", Float.toString(panicSoundVolume));
-        properties.setProperty("idleBondTickInterval", Integer.toString(idleBondTickInterval));
-        properties.setProperty("idleBondTrustGain", Double.toString(idleBondTrustGain));
-        properties.setProperty("idleBondRadius", Integer.toString(idleBondRadius));
-        properties.setProperty("sizeVarianceEnabled", Boolean.toString(sizeVarianceEnabled));
-        properties.setProperty("sizeVarianceRange", Double.toString(sizeVarianceRange));
-        properties.setProperty("mountFoodTrustMultiplier", Double.toString(mountFoodTrustMultiplier));
-        properties.setProperty("calmerBreedingTrustThreshold", Double.toString(calmerBreedingTrustThreshold));
-        properties.setProperty("calmerBreedingLoveTicks", Integer.toString(calmerBreedingLoveTicks));
-        properties.setProperty("hibernateRange", Integer.toString(hibernateRange));
-        properties.setProperty("seasonalBreedingEnabled", Boolean.toString(seasonalBreedingEnabled));
-        properties.setProperty("seasonLengthDays", Integer.toString(seasonLengthDays));
-        properties.setProperty("breedingSeason", breedingSeason);
-        properties.setProperty("herdTrustShareMultiplier", Double.toString(herdTrustShareMultiplier));
-        properties.setProperty("trustedPlayerFleeReduction", Double.toString(trustedPlayerFleeReduction));
-        return properties;
+    private static String toPropertiesText() {
+        return """
+                # Tamekind configuration
+                # Changes take effect on world reload, /tamekind reload, or server restart.
+
+                # ── Master switches ───────────────────────────────────────────────
+                # Master kill switch. If false, no Tamekind behavior runs at all.
+                enabled=%s
+                # Per-feature toggles. Disable to skip that whole subsystem.
+                herdEnabled=%s
+                alertEnabled=%s
+                panicEnabled=%s
+                habitatEnabled=%s
+                trustEnabled=%s
+                stampedeEnabled=%s
+                babyAnchoringEnabled=%s
+                breedingCrowdControlEnabled=%s
+                # If true, a message is shown when feeding is denied by crowd control.
+                breedingCrowdMessageEnabled=%s
+                # Master switch for daily rhythm (graze, rest, drink, home return).
+                dailyRhythmEnabled=%s
+                # Master switch for protective-parent behavior.
+                parentGuardEnabled=%s
+                # Master switch for home-position memory and return drift.
+                homeReturnEnabled=%s
+
+                # ── Farm respect ──────────────────────────────────────────────────
+                # If true, the listed animals skip all Tamekind movement goals so
+                # vanilla farms (pens, leads, breeding, name-tagged pets) stay predictable.
+                respectLeashedAnimals=%s
+                respectMountedAnimals=%s
+                respectBreedingAnimals=%s
+                respectNamedAnimals=%s
+
+                # ── AI level-of-detail ────────────────────────────────────────────
+                # Distance (blocks) from the nearest player at which animals run the full AI.
+                fullAiRange=%d
+                # Beyond fullAiRange but within simpleAiRange, animals run cheaper goals.
+                simpleAiRange=%d
+                # Cached LOD lifetime in ticks; per-entity jitter is added on top.
+                aiLodCacheTicks=%d
+                # Beyond this distance, animals in extreme-temperature biomes hibernate further.
+                hibernateRange=%d
+
+                # ── Threat detection ──────────────────────────────────────────────
+                # Block radius for the alert/freeze scan.
+                alertRadius=%d
+                # Block radius for direct panic; threats within this trigger flight.
+                panicRadius=%d
+                # Block radius for finding herd-mates.
+                herdSearchRadius=%d
+                # Block radius for the shelter search.
+                shelterSearchRadius=%d
+                # How long (ticks) a danger memory lingers.
+                memoryTicks=%d
+                # Cooldown (ticks) before a herd re-broadcasts danger.
+                herdDangerSpreadCooldownTicks=%d
+
+                # ── Alert / freeze ────────────────────────────────────────────────
+                # Minimum freeze duration. Babies use half; freezers use 3x and skip drift.
+                alertFreezeMinTicks=%d
+                # Additional random ticks added on top of the minimum.
+                alertFreezeRandomTicks=%d
+                # Speed during the slow drift-away half of the alert.
+                alertDriftSpeed=%s
+
+                # ── Panic ─────────────────────────────────────────────────────────
+                panicSpeed=%s
+                # Babies use these multipliers on panic speed and radius.
+                babyPanicSpeedMultiplier=%s
+                babyPanicRadiusMultiplier=%s
+                # Number of escape positions scored per panic re-pick.
+                panicCandidateCount=%d
+                # Preferred escape distance from the threat in blocks.
+                panicEscapeDistance=%d
+                # Max drop depth (blocks) considered when settling an escape candidate.
+                panicDropCheckDepth=%d
+                # If true, panic plays a sound cue at start.
+                panicSoundEnabled=%s
+                panicSoundVolume=%s
+
+                # ── Stampede ──────────────────────────────────────────────────────
+                # Herd size required before panic-bumps apply.
+                minStampedeHerdSize=%d
+                # Base horizontal push applied to nearby pushables.
+                stampedeKnockback=%s
+                # Extra knockback per herd member above minStampedeHerdSize.
+                stampedeHerdScaling=%s
+                # If true, panicking animals can trample crops they pass over. Off by default.
+                stampedeCropDamageEnabled=%s
+                # Probability per tick that a crop under the foot is trampled.
+                stampedeCropDamageChance=%s
+
+                # ── Habitat / daily rhythm ────────────────────────────────────────
+                shelterSpeed=%s
+                grazeSearchRadius=%d
+                # Minimum interval (ticks) between graze attempts.
+                grazeMinIntervalTicks=%d
+                # Base graze duration. Night triples, comfort biome 1.5x, SS winter halves, spring 1.3x.
+                grazeDurationTicks=%d
+                drinkSearchRadius=%d
+                drinkMinIntervalTicks=%d
+                drinkDurationTicks=%d
+                # Speed when a follower drifts back home.
+                homeReturnSpeed=%s
+                # Min/max distance (blocks) at which home-return triggers.
+                homeReturnMinDistance=%d
+                homeReturnMaxDistance=%d
+                # Interval (ticks) between home-return attempts.
+                homeReturnIntervalTicks=%d
+                # Herd-follow speed.
+                herdFollowSpeed=%s
+
+                # ── Babies & parents ──────────────────────────────────────────────
+                babyAnchorSearchRadius=%d
+                babyAnchorSpeed=%s
+                # Ticks an adult stays in "guarding" mode after a same-type baby is hit.
+                parentGuardTicks=%d
+                parentGuardRadius=%d
+
+                # ── Breeding ──────────────────────────────────────────────────────
+                # Radius (blocks) sampled for crowd control around the fed animal.
+                breedingCrowdRadius=%d
+                # Below softLimit no refusal; between soft and hard refusal ramps linearly; at hard always refuses.
+                breedingCrowdSoftLimit=%d
+                breedingCrowdHardLimit=%d
+                # When trust >= threshold, feeding sets love mode for this many ticks.
+                calmerBreedingTrustThreshold=%s
+                calmerBreedingLoveTicks=%d
+                # Optional seasonal gate for automatic / unattended breeding.
+                seasonalBreedingEnabled=%s
+                # Length of each internal season in days (used when Serene Seasons is not present).
+                seasonLengthDays=%d
+                # Allowed season: spring, summer, autumn, winter, or "any".
+                breedingSeason=%s
+
+                # ── Trust ─────────────────────────────────────────────────────────
+                trustTicks=%d
+                # Trust added per food item fed.
+                trustPerFeeding=%s
+                # Trust removed per hit from the attacker.
+                trustLossPerHit=%s
+                # When the attacker's trust >= threshold, hits don't trigger danger memory.
+                trustHitForgivenessThreshold=%s
+                # Share of trustPerFeeding propagated to nearby herd-mates.
+                herdTrustShareMultiplier=%s
+                # How much trust reduces flee distance from a sprinting trusted player (0..1).
+                trustedPlayerFleeReduction=%s
+                # Passive trust gain per idle bond tick when near owner / nearest player.
+                idleBondTickInterval=%d
+                idleBondTrustGain=%s
+                idleBondRadius=%d
+
+                # ── Health & disposition ──────────────────────────────────────────
+                # Below this fraction of max HP, animals limp and prefer shelter.
+                lowHpThresholdFraction=%s
+                limpSpeedMultiplier=%s
+
+                # ── Pets & mounts ─────────────────────────────────────────────────
+                # If true, trusted animals slow-follow a nearby trusted player.
+                followTrustedEnabled=%s
+                followTrustedRadius=%d
+                followTrustedMinTrust=%s
+                followTrustedSpeed=%s
+                # Mount feeding multiplies the trust duration by this factor.
+                mountFoodTrustMultiplier=%s
+
+                # ── Visual ────────────────────────────────────────────────────────
+                # If true, each animal spawns with a small deterministic size variation.
+                sizeVarianceEnabled=%s
+                # Maximum +/- scale variance (e.g. 0.10 = 90%%..110%%).
+                sizeVarianceRange=%s
+                """.formatted(
+                        enabled, herdEnabled, alertEnabled, panicEnabled, habitatEnabled, trustEnabled,
+                        stampedeEnabled, babyAnchoringEnabled, breedingCrowdControlEnabled,
+                        breedingCrowdMessageEnabled, dailyRhythmEnabled, parentGuardEnabled, homeReturnEnabled,
+                        respectLeashedAnimals, respectMountedAnimals, respectBreedingAnimals, respectNamedAnimals,
+                        fullAiRange, simpleAiRange, aiLodCacheTicks, hibernateRange,
+                        alertRadius, panicRadius, herdSearchRadius, shelterSearchRadius,
+                        memoryTicks, herdDangerSpreadCooldownTicks,
+                        alertFreezeMinTicks, alertFreezeRandomTicks, Double.toString(alertDriftSpeed),
+                        Double.toString(panicSpeed), Double.toString(babyPanicSpeedMultiplier),
+                        Double.toString(babyPanicRadiusMultiplier),
+                        panicCandidateCount, panicEscapeDistance, panicDropCheckDepth,
+                        panicSoundEnabled, Float.toString(panicSoundVolume),
+                        minStampedeHerdSize, Double.toString(stampedeKnockback),
+                        Double.toString(stampedeHerdScaling),
+                        stampedeCropDamageEnabled, Double.toString(stampedeCropDamageChance),
+                        Double.toString(shelterSpeed),
+                        grazeSearchRadius, grazeMinIntervalTicks, grazeDurationTicks,
+                        drinkSearchRadius, drinkMinIntervalTicks, drinkDurationTicks,
+                        Double.toString(homeReturnSpeed), homeReturnMinDistance, homeReturnMaxDistance,
+                        homeReturnIntervalTicks, Double.toString(herdFollowSpeed),
+                        babyAnchorSearchRadius, Double.toString(babyAnchorSpeed),
+                        parentGuardTicks, parentGuardRadius,
+                        breedingCrowdRadius, breedingCrowdSoftLimit, breedingCrowdHardLimit,
+                        Double.toString(calmerBreedingTrustThreshold), calmerBreedingLoveTicks,
+                        seasonalBreedingEnabled, seasonLengthDays, breedingSeason,
+                        trustTicks, Double.toString(trustPerFeeding), Double.toString(trustLossPerHit),
+                        Double.toString(trustHitForgivenessThreshold),
+                        Double.toString(herdTrustShareMultiplier),
+                        Double.toString(trustedPlayerFleeReduction),
+                        idleBondTickInterval, Double.toString(idleBondTrustGain), idleBondRadius,
+                        Double.toString(lowHpThresholdFraction), Double.toString(limpSpeedMultiplier),
+                        followTrustedEnabled, followTrustedRadius,
+                        Double.toString(followTrustedMinTrust), Double.toString(followTrustedSpeed),
+                        Double.toString(mountFoodTrustMultiplier),
+                        sizeVarianceEnabled, Double.toString(sizeVarianceRange));
     }
 
     private static boolean bool(Properties properties, String key, boolean fallback) {
