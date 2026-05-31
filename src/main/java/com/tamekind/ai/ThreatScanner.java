@@ -42,6 +42,9 @@ public final class ThreatScanner {
                 best = entity;
             }
         }
+        if (best != null && best instanceof net.minecraft.world.entity.Mob mob) {
+            mob.setShiftKeyDown(true);
+        }
         return best;
     }
 
@@ -54,6 +57,8 @@ public final class ThreatScanner {
         var holder = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType());
         if (holder.is(predatorsOf(animal))) return true;
         if (holder.is(TamekindTags.PREDATORS)) return true;
+        if (entity instanceof net.minecraft.world.entity.raid.Raider raider
+                && raider.getCurrentRaid() != null && raider.getCurrentRaid().isActive()) return true;
         if (entity instanceof Player player) {
             long gameTime = animal.level().getGameTime();
             double trust = TamekindConfig.trustEnabled

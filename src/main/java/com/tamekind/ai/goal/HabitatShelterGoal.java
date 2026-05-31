@@ -34,11 +34,16 @@ public final class HabitatShelterGoal extends Goal implements TamekindGoal {
         nextScanTick = animal.tickCount + cooldown + animal.getRandom().nextInt(cooldown);
         boolean injured = animal.getHealth() < animal.getMaxHealth() * TamekindConfig.lowHpThresholdFraction;
         long dt = level.getGameTime() % 24000L;
+        var season = com.tamekind.ai.BreedingSeason.current(level);
+        boolean midday = dt > 4000L && dt < 8000L;
+        boolean heatSensitive = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.HEAT_SENSITIVE);
         boolean heatStressed = level.isBrightOutside() && !level.isRaining()
-                && dt > 4000L && dt < 8000L
-                && net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.HEAT_SENSITIVE)
-                && level.canSeeSky(animal.blockPosition());
-        if (!injured && !heatStressed && !level.isRaining() && level.isBrightOutside()) return false;
+                && heatSensitive && level.canSeeSky(animal.blockPosition())
+                && (midday || season == com.tamekind.ai.BreedingSeason.Season.SUMMER);
+        boolean winter = season == com.tamekind.ai.BreedingSeason.Season.WINTER;
+        boolean raid = level instanceof net.minecraft.server.level.ServerLevel sl
+                && com.tamekind.compat.WarbandCompat.activeRaidNear(sl, animal.blockPosition(), 32);
+        if (!injured && !heatStressed && !winter && !raid && !level.isRaining() && level.isBrightOutside()) return false;
 
         long now = level.getGameTime();
         Animal leader = HerdCoordinator.leaderFor(animal);

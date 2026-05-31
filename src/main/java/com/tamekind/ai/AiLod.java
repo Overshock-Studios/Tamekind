@@ -11,7 +11,8 @@ import java.util.WeakHashMap;
 public enum AiLod {
     FULL,
     SIMPLE,
-    SLEEP;
+    SLEEP,
+    HIBERNATE;
 
     private static final Map<Animal, CachedLod> CACHE = new WeakHashMap<>();
 
@@ -46,6 +47,11 @@ public enum AiLod {
         if (nearest <= (double) full * full) return FULL;
         int simple = TamekindConfig.simpleAiRange;
         if (nearest <= (double) simple * simple) return SIMPLE;
+        int hibernate = TamekindConfig.hibernateRange;
+        if (nearest > (double) hibernate * hibernate) {
+            float temp = level.getBiome(animal.blockPosition()).value().getBaseTemperature();
+            if (temp <= 0.1f || temp >= 1.5f) return HIBERNATE;
+        }
         return SLEEP;
     }
 

@@ -92,6 +92,10 @@ public final class TamekindConfig {
     public static double mountFoodTrustMultiplier = 4.0;
     public static double calmerBreedingTrustThreshold = 0.4;
     public static int calmerBreedingLoveTicks = 1200;
+    public static int hibernateRange = 160;
+    public static boolean seasonalBreedingEnabled = false;
+    public static int seasonLengthDays = 30;
+    public static String breedingSeason = "spring";
     public static double herdTrustShareMultiplier = 0.35;
     public static double trustedPlayerFleeReduction = 0.65;
 
@@ -275,6 +279,10 @@ public final class TamekindConfig {
         mountFoodTrustMultiplier = decimal(properties, "mountFoodTrustMultiplier", mountFoodTrustMultiplier);
         calmerBreedingTrustThreshold = decimal(properties, "calmerBreedingTrustThreshold", calmerBreedingTrustThreshold);
         calmerBreedingLoveTicks = integer(properties, "calmerBreedingLoveTicks", calmerBreedingLoveTicks);
+        hibernateRange = integer(properties, "hibernateRange", hibernateRange);
+        seasonalBreedingEnabled = bool(properties, "seasonalBreedingEnabled", seasonalBreedingEnabled);
+        seasonLengthDays = integer(properties, "seasonLengthDays", seasonLengthDays);
+        breedingSeason = properties.getProperty("breedingSeason", breedingSeason).trim().toLowerCase(java.util.Locale.ROOT);
         herdTrustShareMultiplier = decimal(properties, "herdTrustShareMultiplier", herdTrustShareMultiplier);
         trustedPlayerFleeReduction = decimal(properties, "trustedPlayerFleeReduction", trustedPlayerFleeReduction);
     }
@@ -360,6 +368,10 @@ public final class TamekindConfig {
         properties.setProperty("mountFoodTrustMultiplier", Double.toString(mountFoodTrustMultiplier));
         properties.setProperty("calmerBreedingTrustThreshold", Double.toString(calmerBreedingTrustThreshold));
         properties.setProperty("calmerBreedingLoveTicks", Integer.toString(calmerBreedingLoveTicks));
+        properties.setProperty("hibernateRange", Integer.toString(hibernateRange));
+        properties.setProperty("seasonalBreedingEnabled", Boolean.toString(seasonalBreedingEnabled));
+        properties.setProperty("seasonLengthDays", Integer.toString(seasonLengthDays));
+        properties.setProperty("breedingSeason", breedingSeason);
         properties.setProperty("herdTrustShareMultiplier", Double.toString(herdTrustShareMultiplier));
         properties.setProperty("trustedPlayerFleeReduction", Double.toString(trustedPlayerFleeReduction));
         return properties;

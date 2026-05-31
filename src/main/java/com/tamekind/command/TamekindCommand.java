@@ -50,7 +50,12 @@ public final class TamekindCommand {
                         .then(Commands.literal("dump")
                                 .executes(TamekindCommand::dumpNearest))
                         .then(Commands.literal("trust")
-                                .executes(TamekindCommand::reportTrust))
+                                .executes(TamekindCommand::reportTrust)
+                                .then(Commands.literal("map")
+                                        .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                                                .executes(TamekindCommand::trustMap))))
+                        .then(Commands.literal("season")
+                                .executes(TamekindCommand::reportSeason))
                         .then(Commands.literal("disable")
                                 .then(Commands.argument("type", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
                                         .executes(TamekindCommand::toggleDisable)))
@@ -140,6 +145,38 @@ public final class TamekindCommand {
         }
         boolean nowDisabled = com.tamekind.ai.TamekindAnimalRules.toggleRuntimeDisable(type);
         source.sendSuccess(() -> Component.literal("[Tamekind] " + identifier + (nowDisabled ? " disabled" : " enabled")), true);
+        return 1;
+    }
+
+    private static int trustMap(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        CommandSourceStack source = ctx.getSource();
+        ServerPlayer target = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+        ServerLevel level = source.getLevel();
+        AABB box = AABB.ofSize(source.getPosition(), 48.0, 48.0, 48.0);
+        long now = level.getGameTime();
+        int total = 0, trusting = 0;
+        double sum = 0.0;
+        for (Animal a : level.getEntitiesOfClass(Animal.class, box)) {
+            total++;
+            double t = AnimalMemoryStore.get(a).trustScore(target.getUUID(), now);
+            if (t > 0.0) { trusting++; sum += t; }
+        }
+        final int tot = total, tr = trusting;
+        final double avg = tr == 0 ? 0.0 : sum / tr;
+        source.sendSuccess(() -> Component.literal(String.format(
+                "[Tamekind] within 48 of caller: %d animals, %d trust %s (avg=%.2f)",
+                tot, tr, target.getName().getString(), avg)), false);
+        return 1;
+    }
+
+    private static int reportSeason(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+        var s = com.tamekind.ai.BreedingSeason.current(ctx.getSource().getLevel());
+        boolean breeding = com.tamekind.ai.BreedingSeason.isBreedingSeason(ctx.getSource().getLevel());
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "[Tamekind] season=" + s.name().toLowerCase(java.util.Locale.ROOT)
+                        + " breeding=" + breeding
+                        + " (gated=" + TamekindConfig.seasonalBreedingEnabled + ")"), false);
         return 1;
     }
 

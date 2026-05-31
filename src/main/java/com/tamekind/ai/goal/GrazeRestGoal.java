@@ -62,6 +62,9 @@ public final class GrazeRestGoal extends Goal implements TamekindGoal {
         int base = TamekindConfig.grazeDurationTicks;
         if (!animal.level().isBrightOutside()) base *= 3;
         if (com.tamekind.ai.BiomeComfort.isInComfortBiome(animal)) base = (int) (base * 1.5);
+        var season = com.tamekind.ai.BreedingSeason.current(animal.level());
+        if (season == com.tamekind.ai.BreedingSeason.Season.WINTER) base = (int) (base * 0.5);
+        else if (season == com.tamekind.ai.BreedingSeason.Season.SPRING) base = (int) (base * 1.3);
         grazeTicks = base + animal.getRandom().nextInt(Math.max(1, base));
         if (animal.blockPosition().distSqr(grazingSpot) > 3.0) {
             animal.getNavigation().moveTo(grazingSpot.getX() + 0.5, grazingSpot.getY(), grazingSpot.getZ() + 0.5, 0.8);
