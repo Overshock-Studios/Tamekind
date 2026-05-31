@@ -9,10 +9,13 @@
   ],
   "contact": {},
   "license": "MIT",
-  "environment": "*",
+  "environment": "server",
   "entrypoints": {
     "main": [
       "com.tamekind.TamekindMod"
+    ],
+    "fabric-datagen": [
+      "com.tamekind.datagen.TamekindDataGenerator"
     ]
   },
   "mixins": [

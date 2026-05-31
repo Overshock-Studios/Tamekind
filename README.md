@@ -55,6 +55,7 @@ Tamekind is the passive-side counterpart to hostile AI overhauls. Animals herd, 
 ### Integrations
 - **Serene Seasons** *(optional, detected via FabricLoader)*: `BreedingSeason` reads SS season state via reflection when SS is loaded; falls back to internal day-count seasons otherwise. Winter shortens graze duration and triggers shelter-seek even on clear days; spring extends graze; summer keeps heat-sensitive species seeking shade beyond just midday.
 - **Warband / vanilla raids**: an active raid within 32 blocks triggers shelter-seek regardless of weather. Active raiders count as direct threats in `ThreatScanner` (works with vanilla raids and with Warband's enhanced raid AI without a hard dependency).
+- **Two-way predator tag**: wolves and foxes are mixed in with a target goal that hunts any animal listing them in `tamekind:predators_of/<prey>`. The tag becomes a contract — adding a predator to a prey's tag now causes both flight (prey side) and pursuit (predator side).
 
 ### Persistence
 - Animal memory (danger, home, guard, all three shared positions, trust map, danger-spread cooldown) is round-tripped through NBT.
@@ -108,9 +109,27 @@ Per-field overrides live in `config/tamekind.properties` (auto-generated on firs
 ### Integrations
 - **Hearthfolk (villager companion mod)** — *planned*: villagers known to the village boost nearby animals' trust similar to the owner-player.
 
-### Tooling
-- **Predator AI patches** — small mixins so hostile wolves and foxes actively hunt entries in `predators_of/<prey>`, turning the tag into a two-way contract.
-- **Datagen** for default tags instead of hand-written JSON.
+_(All originally planned items implemented.)_
+
+## Development
+
+### Datagen
+Tag JSONs can be regenerated via Fabric datagen:
+
+```
+./gradlew runDatagen
+```
+
+Output goes to `src/main/generated/data/tamekind/tags/`. Providers live in `com.tamekind.datagen`. Hand-written JSONs under `src/main/resources/data/tamekind/tags/` are still present and take precedence; remove them if you want a pure-datagen pipeline.
+
+### Tests
+Pure-Java JUnit 5 tests for season cycling and config profiles:
+
+```
+./gradlew test
+```
+
+Reports land in `build/reports/tests/test/`.
 
 ## Requirements
 

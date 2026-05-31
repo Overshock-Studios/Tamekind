@@ -18,8 +18,12 @@ public final class BreedingSeason {
             case WINTER: return Season.WINTER;
             default: break;
         }
-        long days = Math.max(0, level.getGameTime()) / 24000L;
-        int seasonLength = Math.max(1, TamekindConfig.seasonLengthDays);
+        return fromGameTime(level.getGameTime(), TamekindConfig.seasonLengthDays);
+    }
+
+    public static Season fromGameTime(long gameTime, int seasonLengthDays) {
+        long days = Math.max(0, gameTime) / 24000L;
+        int seasonLength = Math.max(1, seasonLengthDays);
         int idx = (int) ((days / seasonLength) % 4);
         return Season.values()[idx];
     }

@@ -19,6 +19,35 @@ dependencies {
 
     implementation "net.fabricmc:fabric-loader:${loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+    testImplementation platform("org.junit:junit-bom:5.10.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs += ['src/main/generated']
+        }
+    }
+}
+
+loom {
+    runs {
+        datagen {
+            inherit server
+            name "Datagen"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file('src/main/generated')}"
+            vmArg "-Dfabric-api.datagen.modid=tamekind"
+            runDir "build/datagen"
+        }
+    }
 }
 
 java {
