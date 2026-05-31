@@ -45,6 +45,11 @@ public final class LostBabyGoal extends Goal implements TamekindGoal {
     @Override
     public void start() {
         baby.getNavigation().stop();
+        if (TamekindConfig.panicSoundEnabled) {
+            baby.playSound(net.minecraft.sounds.SoundEvents.GENERIC_HURT,
+                    TamekindConfig.panicSoundVolume,
+                    1.4f);
+        }
     }
 
     @Override

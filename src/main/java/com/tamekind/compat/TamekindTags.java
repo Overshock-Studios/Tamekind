@@ -13,6 +13,7 @@ public final class TamekindTags {
     public static final TagKey<EntityType<?>> DISABLED = entity("disabled");
     public static final TagKey<EntityType<?>> FREEZERS = entity("freezers");
     public static final TagKey<EntityType<?>> MATING_DISPLAYS = entity("mating_displays");
+    public static final TagKey<EntityType<?>> HEAT_SENSITIVE = entity("heat_sensitive");
     public static final TagKey<Block> GRAZING_BLOCKS = block("grazing_blocks");
     public static final TagKey<Block> SHELTER_BLOCKS = block("shelter_blocks");
     public static final TagKey<Block> AVOID_BLOCKS = block("avoid_blocks");

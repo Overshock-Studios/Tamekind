@@ -33,7 +33,12 @@ public final class HabitatShelterGoal extends Goal implements TamekindGoal {
         int cooldown = thundering ? 20 : 80;
         nextScanTick = animal.tickCount + cooldown + animal.getRandom().nextInt(cooldown);
         boolean injured = animal.getHealth() < animal.getMaxHealth() * TamekindConfig.lowHpThresholdFraction;
-        if (!injured && !level.isRaining() && level.isBrightOutside()) return false;
+        long dt = level.getGameTime() % 24000L;
+        boolean heatStressed = level.isBrightOutside() && !level.isRaining()
+                && dt > 4000L && dt < 8000L
+                && net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.HEAT_SENSITIVE)
+                && level.canSeeSky(animal.blockPosition());
+        if (!injured && !heatStressed && !level.isRaining() && level.isBrightOutside()) return false;
 
         long now = level.getGameTime();
         Animal leader = HerdCoordinator.leaderFor(animal);

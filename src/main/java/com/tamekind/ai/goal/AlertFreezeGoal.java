@@ -42,6 +42,11 @@ public final class AlertFreezeGoal extends Goal implements TamekindGoal {
 
     @Override
     public void start() {
+        if (TamekindConfig.panicSoundEnabled) {
+            animal.playSound(net.minecraft.sounds.SoundEvents.GENERIC_HURT,
+                    TamekindConfig.panicSoundVolume * 0.5f,
+                    1.2f + animal.getRandom().nextFloat() * 0.2f);
+        }
         int rnd = Math.max(1, TamekindConfig.alertFreezeRandomTicks);
         int min = TamekindConfig.alertFreezeMinTicks;
         if (animal.isBaby()) { min = Math.max(5, min / 2); rnd = Math.max(1, rnd / 2); }
