@@ -10,6 +10,8 @@ import com.tamekind.ai.goal.LostBabyGoal;
 import com.tamekind.ai.goal.MotherBondGoal;
 import com.tamekind.ai.goal.MatingDisplayGoal;
 import com.tamekind.ai.goal.PetIdleBondGoal;
+import com.tamekind.ai.goal.AgeScaleGoal;
+import com.tamekind.ai.goal.AlphaPrideGoal;
 import com.tamekind.ai.goal.MountObedienceGoal;
 import com.tamekind.ai.goal.PetDangerRelayGoal;
 import com.tamekind.ai.goal.WallowGoal;
@@ -137,6 +139,8 @@ public final class PassiveGoalInjector {
         accessor.tamekind$goalSelector().addGoal(15, new WallowGoal(animal));
         accessor.tamekind$goalSelector().addGoal(16, new MountObedienceGoal(animal));
         accessor.tamekind$goalSelector().addGoal(17, new PetDangerRelayGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(18, new AlphaPrideGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(19, new AgeScaleGoal(animal));
     }
 
     private static boolean hasTamekindGoal(Animal animal) {

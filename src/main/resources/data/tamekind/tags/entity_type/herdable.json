@@ -10,6 +10,8 @@
     "minecraft:mule",
     "minecraft:llama",
     "minecraft:goat",
-    "minecraft:rabbit"
+    "minecraft:rabbit",
+    "minecraft:wolf",
+    "minecraft:fox"
   ]
 }

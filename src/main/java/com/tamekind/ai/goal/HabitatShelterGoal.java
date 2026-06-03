@@ -96,11 +96,12 @@ public final class HabitatShelterGoal extends Goal implements TamekindGoal {
         BlockPos best = null;
         long bestScore = Long.MAX_VALUE;
         int radius = TamekindConfig.shelterSearchRadius;
+        int vertical = TamekindConfig.shelterVerticalRadius;
         boolean night = !level.isBrightOutside();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
-                for (int dy = -2; dy <= 2; dy++) {
+                for (int dy = -vertical; dy <= vertical; dy++) {
                     cursor.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
                     if (!level.getBlockState(cursor).isAir()) continue;
                     if (level.getBlockState(cursor.below()).isAir()) continue;

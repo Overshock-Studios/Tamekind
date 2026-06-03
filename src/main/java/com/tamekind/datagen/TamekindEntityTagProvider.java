@@ -26,7 +26,7 @@ public final class TamekindEntityTagProvider extends FabricTagsProvider.EntityTy
         add(TamekindTags.HERDABLE,
                 EntityType.COW, EntityType.SHEEP, EntityType.PIG, EntityType.GOAT,
                 EntityType.HORSE, EntityType.DONKEY, EntityType.MULE, EntityType.LLAMA,
-                EntityType.RABBIT, EntityType.CHICKEN);
+                EntityType.RABBIT, EntityType.CHICKEN, EntityType.WOLF, EntityType.FOX);
         add(TamekindTags.DISABLED);
     }
 

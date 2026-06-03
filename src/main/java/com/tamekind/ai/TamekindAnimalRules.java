@@ -28,6 +28,8 @@ public final class TamekindAnimalRules {
         if (TamekindConfig.respectLeashedAnimals && animal.isLeashed()) return true;
         if (TamekindConfig.respectMountedAnimals && (animal.isPassenger() || animal.isVehicle())) return true;
         if (TamekindConfig.respectNamedAnimals && animal.hasCustomName()) return true;
+        if (TamekindConfig.respectTamedAnimals
+                && animal instanceof net.minecraft.world.entity.TamableAnimal tame && tame.isTame()) return true;
         return TamekindConfig.respectBreedingAnimals && animal.isInLove();
     }
 }

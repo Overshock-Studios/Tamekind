@@ -25,6 +25,7 @@ public final class TamekindConfig {
     public static boolean respectMountedAnimals = true;
     public static boolean respectBreedingAnimals = true;
     public static boolean respectNamedAnimals = true;
+    public static boolean respectTamedAnimals = true;
 
     public static int fullAiRange = 48;
     public static int simpleAiRange = 96;
@@ -32,7 +33,8 @@ public final class TamekindConfig {
     public static int alertRadius = 18;
     public static int panicRadius = 8;
     public static int herdSearchRadius = 16;
-    public static int shelterSearchRadius = 10;
+    public static int shelterSearchRadius = 15;
+    public static int shelterVerticalRadius = 4;
     public static int memoryTicks = 20 * 30;
     public static int herdDangerSpreadCooldownTicks = 20;
     public static int trustTicks = 20 * 60 * 20;
@@ -88,11 +90,15 @@ public final class TamekindConfig {
     public static double idleBondTrustGain = 0.01;
     public static int idleBondRadius = 8;
     public static boolean sizeVarianceEnabled = true;
-    public static double sizeVarianceRange = 0.10;
+    public static double sizeVarianceRange = 0.25;
+    public static boolean ageScalingEnabled = true;
+    public static double babyStartScaleMultiplier = 0.4;
     public static boolean scaredNoCoverEnabled = true;
     public static int scaredNoCoverDurationTicks = 60;
     public static boolean lightningPanicEnabled = true;
     public static int lightningPanicRadius = 32;
+    public static double alphaScaleBonus = 0.08;
+    public static int alphaMinHerdSize = 2;
     public static double mountFoodTrustMultiplier = 4.0;
     public static double calmerBreedingTrustThreshold = 0.4;
     public static int calmerBreedingLoveTicks = 1200;
@@ -215,6 +221,7 @@ public final class TamekindConfig {
         respectMountedAnimals = bool(properties, "respectMountedAnimals", respectMountedAnimals);
         respectBreedingAnimals = bool(properties, "respectBreedingAnimals", respectBreedingAnimals);
         respectNamedAnimals = bool(properties, "respectNamedAnimals", respectNamedAnimals);
+        respectTamedAnimals = bool(properties, "respectTamedAnimals", respectTamedAnimals);
 
         fullAiRange = integer(properties, "fullAiRange", fullAiRange);
         simpleAiRange = integer(properties, "simpleAiRange", simpleAiRange);
@@ -223,6 +230,7 @@ public final class TamekindConfig {
         panicRadius = integer(properties, "panicRadius", panicRadius);
         herdSearchRadius = integer(properties, "herdSearchRadius", herdSearchRadius);
         shelterSearchRadius = integer(properties, "shelterSearchRadius", shelterSearchRadius);
+        shelterVerticalRadius = integer(properties, "shelterVerticalRadius", shelterVerticalRadius);
         memoryTicks = integer(properties, "memoryTicks", memoryTicks);
         herdDangerSpreadCooldownTicks = integer(properties, "herdDangerSpreadCooldownTicks", herdDangerSpreadCooldownTicks);
         trustTicks = integer(properties, "trustTicks", trustTicks);
@@ -278,10 +286,14 @@ public final class TamekindConfig {
         idleBondRadius = integer(properties, "idleBondRadius", idleBondRadius);
         sizeVarianceEnabled = bool(properties, "sizeVarianceEnabled", sizeVarianceEnabled);
         sizeVarianceRange = decimal(properties, "sizeVarianceRange", sizeVarianceRange);
+        ageScalingEnabled = bool(properties, "ageScalingEnabled", ageScalingEnabled);
+        babyStartScaleMultiplier = decimal(properties, "babyStartScaleMultiplier", babyStartScaleMultiplier);
         scaredNoCoverEnabled = bool(properties, "scaredNoCoverEnabled", scaredNoCoverEnabled);
         scaredNoCoverDurationTicks = integer(properties, "scaredNoCoverDurationTicks", scaredNoCoverDurationTicks);
         lightningPanicEnabled = bool(properties, "lightningPanicEnabled", lightningPanicEnabled);
         lightningPanicRadius = integer(properties, "lightningPanicRadius", lightningPanicRadius);
+        alphaScaleBonus = decimal(properties, "alphaScaleBonus", alphaScaleBonus);
+        alphaMinHerdSize = integer(properties, "alphaMinHerdSize", alphaMinHerdSize);
         mountFoodTrustMultiplier = decimal(properties, "mountFoodTrustMultiplier", mountFoodTrustMultiplier);
         calmerBreedingTrustThreshold = decimal(properties, "calmerBreedingTrustThreshold", calmerBreedingTrustThreshold);
         calmerBreedingLoveTicks = integer(properties, "calmerBreedingLoveTicks", calmerBreedingLoveTicks);
@@ -326,6 +338,8 @@ public final class TamekindConfig {
                 respectMountedAnimals=%s
                 respectBreedingAnimals=%s
                 respectNamedAnimals=%s
+                # Tamed pets (wolves, cats, parrots, etc.) keep their owner-following AI instead.
+                respectTamedAnimals=%s
 
                 # ── AI level-of-detail ────────────────────────────────────────────
                 # Distance (blocks) from the nearest player at which animals run the full AI.
@@ -346,6 +360,8 @@ public final class TamekindConfig {
                 herdSearchRadius=%d
                 # Block radius for the shelter search.
                 shelterSearchRadius=%d
+                # Vertical search range (+/-) for the shelter search.
+                shelterVerticalRadius=%d
                 # How long (ticks) a danger memory lingers.
                 memoryTicks=%d
                 # Cooldown (ticks) before a herd re-broadcasts danger.
@@ -463,8 +479,12 @@ public final class TamekindConfig {
                 # ── Visual ────────────────────────────────────────────────────────
                 # If true, each animal spawns with a small deterministic size variation.
                 sizeVarianceEnabled=%s
-                # Maximum +/- scale variance (e.g. 0.10 = 90%%..110%%).
+                # Maximum +/- scale variance (e.g. 0.25 = 75%%..125%%).
                 sizeVarianceRange=%s
+                # If true, babies smoothly grow from babyStartScaleMultiplier up to full adult size.
+                ageScalingEnabled=%s
+                # Multiplier applied to a newborn baby; interpolates linearly to 1.0 as they age into adulthood.
+                babyStartScaleMultiplier=%s
 
                 # ── Storm reactions ───────────────────────────────────────────────
                 # If true, animals that need cover but can't find any briefly panic in place.
@@ -475,13 +495,20 @@ public final class TamekindConfig {
                 lightningPanicEnabled=%s
                 # Block radius around a lightning bolt that gets the danger memory.
                 lightningPanicRadius=%d
+
+                # ── Alpha / leader presence ───────────────────────────────────────
+                # Extra scale multiplier added to the herd alpha (0.0 disables).
+                alphaScaleBonus=%s
+                # Minimum herd size (including self) before the alpha bonus applies.
+                alphaMinHerdSize=%d
                 """.formatted(
                         enabled, herdEnabled, alertEnabled, panicEnabled, habitatEnabled, trustEnabled,
                         stampedeEnabled, babyAnchoringEnabled, breedingCrowdControlEnabled,
                         breedingCrowdMessageEnabled, dailyRhythmEnabled, parentGuardEnabled, homeReturnEnabled,
-                        respectLeashedAnimals, respectMountedAnimals, respectBreedingAnimals, respectNamedAnimals,
+                        respectLeashedAnimals, respectMountedAnimals, respectBreedingAnimals,
+                        respectNamedAnimals, respectTamedAnimals,
                         fullAiRange, simpleAiRange, aiLodCacheTicks, hibernateRange,
-                        alertRadius, panicRadius, herdSearchRadius, shelterSearchRadius,
+                        alertRadius, panicRadius, herdSearchRadius, shelterSearchRadius, shelterVerticalRadius,
                         memoryTicks, herdDangerSpreadCooldownTicks,
                         alertFreezeMinTicks, alertFreezeRandomTicks, Double.toString(alertDriftSpeed),
                         Double.toString(panicSpeed), Double.toString(babyPanicSpeedMultiplier),
@@ -511,8 +538,10 @@ public final class TamekindConfig {
                         Double.toString(followTrustedMinTrust), Double.toString(followTrustedSpeed),
                         Double.toString(mountFoodTrustMultiplier),
                         sizeVarianceEnabled, Double.toString(sizeVarianceRange),
+                        ageScalingEnabled, Double.toString(babyStartScaleMultiplier),
                         scaredNoCoverEnabled, scaredNoCoverDurationTicks,
-                        lightningPanicEnabled, lightningPanicRadius);
+                        lightningPanicEnabled, lightningPanicRadius,
+                        Double.toString(alphaScaleBonus), alphaMinHerdSize);
     }
 
     private static boolean bool(Properties properties, String key, boolean fallback) {
