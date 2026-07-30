@@ -28,6 +28,19 @@ public final class TamekindEntityTagProvider extends FabricTagsProvider.EntityTy
                 EntityType.HORSE, EntityType.DONKEY, EntityType.MULE, EntityType.LLAMA,
                 EntityType.RABBIT, EntityType.CHICKEN, EntityType.WOLF, EntityType.FOX);
         add(TamekindTags.DISABLED);
+        // Predator turf conflict: wolves contest foxes. The prey-keyed tag drives both
+        // halves at once — foxes flee wolves via ThreatScanner, wolves hunt foxes via
+        // TagHunting — so rivalry needs no separate system, just an entry.
+        if (com.tamekind.config.TamekindConfig.predatorTurfConflictEnabled) {
+            add(predatorsOf("fox"), EntityType.WOLF);
+        }
+    }
+
+    private static net.minecraft.tags.TagKey<EntityType<?>> predatorsOf(String preyPath) {
+        return net.minecraft.tags.TagKey.create(
+                net.minecraft.core.registries.Registries.ENTITY_TYPE,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        com.tamekind.TamekindMod.MOD_ID, "predators_of/minecraft/" + preyPath));
     }
 
     private void add(net.minecraft.tags.TagKey<EntityType<?>> tag, EntityType<?>... types) {
