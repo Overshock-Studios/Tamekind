@@ -17,6 +17,32 @@ public final class PassiveEventDirector {
 
     public static void register() {
         ServerLivingEntityEvents.AFTER_DAMAGE.register(PassiveEventDirector::afterDamage);
+        ServerLivingEntityEvents.AFTER_DEATH.register(PassiveEventDirector::afterDeath);
+    }
+
+    /**
+     * Herd-mates that watch one of their own die remember it. Enough deaths inside the
+     * memory window and the survivors stop fleeing — the herd has decided the field is
+     * theirs. They never retaliate with damage; only panic is suppressed.
+     */
+    private static void afterDeath(LivingEntity entity, DamageSource source) {
+        if (!TamekindConfig.enabled || !TamekindConfig.territorialRetaliationEnabled) return;
+        if (!(entity instanceof Animal dead)) return;
+        if (!(dead.level() instanceof ServerLevel level)) return;
+        // Natural causes do not radicalise a herd; a killer does.
+        if (source.getEntity() == null) return;
+
+        long now = level.getGameTime();
+        AABB box = dead.getBoundingBox().inflate(TamekindConfig.cullWitnessRadius);
+        for (Animal witness : level.getEntitiesOfClass(Animal.class, box, other ->
+                other.isAlive() && other != dead && !other.isBaby()
+                        && other.getType() == dead.getType())) {
+            AnimalMemory memory = AnimalMemoryStore.get(witness);
+            int seen = memory.recordCull(now, TamekindConfig.cullMemoryTicks);
+            if (seen >= TamekindConfig.cullVengeanceThreshold) {
+                memory.markVengeful(now + TamekindConfig.cullVengeanceTicks);
+            }
+        }
     }
 
     private static void afterDamage(LivingEntity entity, DamageSource source,

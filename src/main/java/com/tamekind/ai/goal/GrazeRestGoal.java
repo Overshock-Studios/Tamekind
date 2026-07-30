@@ -34,6 +34,9 @@ public final class GrazeRestGoal extends Goal implements TamekindGoal {
                 + animal.getRandom().nextInt(Math.max(1, TamekindConfig.grazeMinIntervalTicks));
         if (AnimalMemoryStore.get(animal).dangerPos(animal.level().getGameTime()) != null) return false;
         if (animal.isInLove() || animal.isBaby()) return false;
+        // A lone animal is too on-edge to put its head down every time. It still grazes,
+        // just less often, which is what stops isolation stress from starving anything.
+        if (HerdCoordinator.isIsolated(animal) && animal.getRandom().nextInt(3) != 0) return false;
         long now = animal.level().getGameTime();
         Animal leader = HerdCoordinator.leaderFor(animal);
         if (leader != null && leader != animal) {
@@ -94,6 +97,10 @@ public final class GrazeRestGoal extends Goal implements TamekindGoal {
     public void stop() {
         if (grazingSpot != null && animal.blockPosition().distSqr(grazingSpot) < 9.0) {
             AnimalMemoryStore.get(animal).setHome(grazingSpot);
+            // Only a graze the animal actually reached restores condition.
+            if (TamekindConfig.conditionEnabled) {
+                AnimalMemoryStore.get(animal).restoreCondition(TamekindConfig.conditionGrazeRestore);
+            }
         }
         grazingSpot = null;
         grazeTicks = 0;

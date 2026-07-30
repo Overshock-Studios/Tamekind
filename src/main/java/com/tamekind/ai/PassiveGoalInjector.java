@@ -2,7 +2,9 @@ package com.tamekind.ai;
 
 import com.tamekind.ai.goal.AlertFreezeGoal;
 import com.tamekind.ai.goal.BabyAnchorGoal;
+import com.tamekind.ai.goal.ConditionGoal;
 import com.tamekind.ai.goal.DrinkGoal;
+import com.tamekind.ai.goal.HerdTrailGoal;
 import com.tamekind.ai.goal.GrazeRestGoal;
 import com.tamekind.ai.goal.HomeReturnGoal;
 import com.tamekind.ai.goal.FollowTrustedPlayerGoal;
@@ -14,6 +16,7 @@ import com.tamekind.ai.goal.AgeScaleGoal;
 import com.tamekind.ai.goal.AlphaPrideGoal;
 import com.tamekind.ai.goal.MountObedienceGoal;
 import com.tamekind.ai.goal.PetDangerRelayGoal;
+import com.tamekind.ai.goal.SentinelWatchGoal;
 import com.tamekind.ai.goal.WallowGoal;
 import com.tamekind.ai.goal.HabitatShelterGoal;
 import com.tamekind.ai.goal.HerdFollowGoal;
@@ -37,7 +40,7 @@ public final class PassiveGoalInjector {
         ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
             if (entity instanceof Animal animal) {
                 inject(animal);
-                applySizeVariance(animal);
+                SizeVariance.apply(animal);
             } else if (entity instanceof net.minecraft.world.entity.LightningBolt bolt) {
                 broadcastLightning(bolt, level);
             }
@@ -59,7 +62,13 @@ public final class PassiveGoalInjector {
                     durationTicks = (long) (durationTicks * TamekindConfig.mountFoodTrustMultiplier);
                 }
                 long until = level.getGameTime() + durationTicks;
-                AnimalMemoryStore.get(animal).addTrust(player.getUUID(), TamekindConfig.trustPerFeeding, until);
+                // Approach etiquette: crouching reads as calm, so a careful player bonds
+                // faster. Mirrors Warband's rule that crouching *reduces* how threatening
+                // a player is, rather than adding a separate taming mechanic.
+                double gain = TamekindConfig.trustPerFeeding
+                        * AnimalTemperament.forAnimal(animal).trustGainMultiplier();
+                if (player.isShiftKeyDown()) gain *= TamekindConfig.crouchFeedTrustMultiplier;
+                AnimalMemoryStore.get(animal).addTrust(player.getUUID(), gain, until);
                 double existingTrust = AnimalMemoryStore.get(animal).trustScore(player.getUUID(), level.getGameTime());
                 if (existingTrust >= TamekindConfig.calmerBreedingTrustThreshold
                         && !animal.isInLove() && !animal.isBaby()) {
@@ -68,7 +77,7 @@ public final class PassiveGoalInjector {
                 for (Animal herdMate : HerdCoordinator.nearbyHerd(animal)) {
                     AnimalMemoryStore.get(herdMate).addTrust(
                             player.getUUID(),
-                            TamekindConfig.trustPerFeeding * TamekindConfig.herdTrustShareMultiplier,
+                            gain * TamekindConfig.herdTrustShareMultiplier,
                             until);
                 }
             }
@@ -94,19 +103,14 @@ public final class PassiveGoalInjector {
         }
     }
 
-    private static void applySizeVariance(Animal animal) {
-        if (!TamekindConfig.sizeVarianceEnabled) return;
-        var attr = animal.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
-        if (attr == null) return;
-        long seed = animal.getUUID().getLeastSignificantBits();
-        java.util.Random r = new java.util.Random(seed);
-        double variance = TamekindConfig.sizeVarianceRange;
-        double scale = 1.0 + (r.nextDouble() * 2.0 - 1.0) * variance;
-        attr.setBaseValue(scale);
-    }
-
     private static boolean shouldBlockCrowdedBreeding(Animal animal) {
         if (!TamekindConfig.breedingCrowdControlEnabled || animal.isBaby()) return false;
+        // Only refuse a feed that would actually start breeding. For a tame pet or a
+        // wounded animal the same item is a heal, and crowd control must never block
+        // healing your wolf just because the pen is busy.
+        if (animal instanceof net.minecraft.world.entity.TamableAnimal tame && tame.isTame()) return false;
+        if (animal.getHealth() < animal.getMaxHealth()) return false;
+        if (animal.getAge() != 0 || !animal.canFallInLove()) return false;
         int hard = TamekindConfig.breedingCrowdHardLimit;
         if (hard <= 0) return false;
         double radius = TamekindConfig.breedingCrowdRadius;
@@ -128,6 +132,8 @@ public final class PassiveGoalInjector {
         accessor.tamekind$goalSelector().addGoal(2, new AlertFreezeGoal(animal));
         accessor.tamekind$goalSelector().addGoal(5, new HabitatShelterGoal(animal));
         accessor.tamekind$goalSelector().addGoal(6, new HerdFollowGoal(animal));
+        // Above graze/drink on purpose: the alpha on watch must not put its head down.
+        accessor.tamekind$goalSelector().addGoal(7, new SentinelWatchGoal(animal));
         accessor.tamekind$goalSelector().addGoal(8, new GrazeRestGoal(animal));
         accessor.tamekind$goalSelector().addGoal(9, new DrinkGoal(animal));
         accessor.tamekind$goalSelector().addGoal(10, new HomeReturnGoal(animal));
@@ -141,6 +147,8 @@ public final class PassiveGoalInjector {
         accessor.tamekind$goalSelector().addGoal(17, new PetDangerRelayGoal(animal));
         accessor.tamekind$goalSelector().addGoal(18, new AlphaPrideGoal(animal));
         accessor.tamekind$goalSelector().addGoal(19, new AgeScaleGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(20, new HerdTrailGoal(animal));
+        accessor.tamekind$goalSelector().addGoal(21, new ConditionGoal(animal));
     }
 
     private static boolean hasTamekindGoal(Animal animal) {

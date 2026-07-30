@@ -29,7 +29,8 @@ public final class AlertFreezeGoal extends Goal implements TamekindGoal {
         if (!TamekindConfig.enabled || !TamekindConfig.alertEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
         if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         if (animal.tickCount < nextAllowedTick) return false;
-        threat = ThreatScanner.nearestThreat(animal, TamekindConfig.alertRadius);
+        double radius = TamekindConfig.alertRadius * com.tamekind.ai.Disposition.alertMultiplier(animal);
+        threat = ThreatScanner.nearestThreat(animal, radius);
         if (threat == null) return false;
         return animal.distanceToSqr(threat) > TamekindConfig.panicRadius * TamekindConfig.panicRadius;
     }
@@ -52,6 +53,9 @@ public final class AlertFreezeGoal extends Goal implements TamekindGoal {
         if (animal.isBaby()) { min = Math.max(5, min / 2); rnd = Math.max(1, rnd / 2); }
         boolean freezer = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.FREEZERS);
         if (freezer) { min *= 3; rnd *= 2; }
+        double temper = com.tamekind.ai.AnimalTemperament.forAnimal(animal).freezeMultiplier();
+        min = Math.max(5, (int) (min * temper));
+        rnd = Math.max(1, (int) (rnd * temper));
         alertTicks = min + animal.getRandom().nextInt(rnd);
         initialTicks = alertTicks;
         animal.getNavigation().stop();

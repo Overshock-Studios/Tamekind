@@ -48,7 +48,9 @@ public final class PetIdleBondGoal extends Goal implements TamekindGoal {
         }
         if (chosen != null && AnimalMemoryStore.get(animal).dangerPos(level.getGameTime()) == null) {
             long until = level.getGameTime() + TamekindConfig.trustTicks;
-            AnimalMemoryStore.get(animal).addTrust(chosen.getUUID(), TamekindConfig.idleBondTrustGain, until);
+            double gain = TamekindConfig.idleBondTrustGain
+                    * com.tamekind.ai.AnimalTemperament.forAnimal(animal).trustGainMultiplier();
+            AnimalMemoryStore.get(animal).addTrust(chosen.getUUID(), gain, until);
         }
         return false;
     }

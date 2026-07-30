@@ -39,14 +39,35 @@ public final class HerdFollowGoal extends Goal implements TamekindGoal {
 
     @Override
     public void start() {
-        animal.getNavigation().moveTo(leader, TamekindConfig.herdFollowSpeed);
+        follow();
     }
 
     @Override
     public void tick() {
         if (leader != null && animal.tickCount % 20 == 0) {
-            animal.getNavigation().moveTo(leader, TamekindConfig.herdFollowSpeed);
+            follow();
         }
+    }
+
+    /**
+     * Walks the leader's recorded trail rather than making a beeline for it.
+     *
+     * <p>Heading straight at a leader makes a herd converge into one clump and shove
+     * itself through terrain the leader already picked a way around. Following the
+     * oldest still-nearby trail point instead puts the herd in a line along a route
+     * that is known to be walkable. Falls back to the leader directly when no usable
+     * trail point exists — a leader that has not moved has nothing to follow.
+     */
+    private void follow() {
+        double speed = TamekindConfig.herdFollowSpeed * com.tamekind.ai.Disposition.speedMultiplier(animal);
+        net.minecraft.core.BlockPos point = AnimalMemoryStore.get(leader)
+                .trailPointFor(animal.blockPosition(), TamekindConfig.herdSearchRadius
+                        * (double) TamekindConfig.herdSearchRadius);
+        if (point != null) {
+            animal.getNavigation().moveTo(point.getX() + 0.5, point.getY(), point.getZ() + 0.5, speed);
+            return;
+        }
+        animal.getNavigation().moveTo(leader, speed);
     }
 
     @Override

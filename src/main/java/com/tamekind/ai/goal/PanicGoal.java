@@ -35,7 +35,7 @@ public final class PanicGoal extends Goal implements TamekindGoal {
         if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         AnimalMemory memory = AnimalMemoryStore.get(animal);
         memory.tick(animal.level().getGameTime());
-        double panicRadius = TamekindConfig.panicRadius;
+        double panicRadius = TamekindConfig.panicRadius * com.tamekind.ai.Disposition.alertMultiplier(animal);
         if (animal.isBaby()) panicRadius *= TamekindConfig.babyPanicRadiusMultiplier;
         Entity threat = ThreatScanner.nearestThreat(animal, panicRadius);
         if (threat != null) {
@@ -82,6 +82,13 @@ public final class PanicGoal extends Goal implements TamekindGoal {
     private void act() {
         if (danger == null) return;
         long now = animal.level().getGameTime();
+        // A herd that has watched too many of its own die stops running. It does not
+        // fight back — it just refuses to give more ground, and faces the threat.
+        if (!animal.isBaby() && com.tamekind.ai.Disposition.standsGround(animal)) {
+            animal.getNavigation().stop();
+            animal.getLookControl().setLookAt(danger.x, danger.y, danger.z);
+            return;
+        }
         if (TamekindConfig.parentGuardEnabled
                 && !animal.isBaby()
                 && AnimalMemoryStore.get(animal).isGuarding(now)) {
@@ -93,7 +100,7 @@ public final class PanicGoal extends Goal implements TamekindGoal {
         }
         BlockPos escape = chooseEscapePos();
         if (escape == null) return;
-        double speed = TamekindConfig.panicSpeed;
+        double speed = TamekindConfig.panicSpeed * com.tamekind.ai.Disposition.speedMultiplier(animal);
         if (animal.isBaby()) speed *= TamekindConfig.babyPanicSpeedMultiplier;
         if (animal.getHealth() < animal.getMaxHealth() * TamekindConfig.lowHpThresholdFraction) {
             speed *= TamekindConfig.limpSpeedMultiplier;
@@ -166,7 +173,9 @@ public final class PanicGoal extends Goal implements TamekindGoal {
     }
 
     private double scoreEscape(BlockPos pos, Vec3 intendedDirection) {
-        Vec3 center = pos.getCenter();
+        // Vec3.atCenterOf, not pos.getCenter(): getCenter() is gone in 26.2 and the
+        // static factory exists in both (see docs/PORTING-26.2.md).
+        Vec3 center = Vec3.atCenterOf(pos);
         double distanceFromDanger = center.distanceToSqr(danger);
         Vec3 actual = center.subtract(animal.position());
         double alignment = actual.lengthSqr() < 0.001 ? 0.0 : actual.normalize().dot(intendedDirection);

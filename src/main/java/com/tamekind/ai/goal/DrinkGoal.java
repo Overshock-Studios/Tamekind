@@ -7,6 +7,7 @@ import com.tamekind.ai.TamekindAnimalRules;
 import com.tamekind.compat.TamekindTags;
 import com.tamekind.config.TamekindConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
@@ -77,6 +78,10 @@ public final class DrinkGoal extends Goal implements TamekindGoal {
 
     @Override
     public void stop() {
+        if (TamekindConfig.conditionEnabled && waterEdge != null
+                && animal.blockPosition().distSqr(waterEdge) < 9.0) {
+            AnimalMemoryStore.get(animal).restoreCondition(TamekindConfig.conditionDrinkRestore);
+        }
         waterEdge = null;
         drinkTicks = 0;
     }
@@ -105,8 +110,11 @@ public final class DrinkGoal extends Goal implements TamekindGoal {
     private boolean isStandableNextToWater(Level level, BlockPos pos) {
         if (!level.getBlockState(pos).isAir()) return false;
         if (!level.getBlockState(pos.above()).isAir()) return false;
-        if (level.getBlockState(pos.below()).is(TamekindTags.AVOID_BLOCKS)) return false;
-        if (!level.getBlockState(pos.below()).isSolid()) return false;
+        BlockPos below = pos.below();
+        if (level.getBlockState(below).is(TamekindTags.AVOID_BLOCKS)) return false;
+        // isFaceSturdy, not the deprecated isSolid(): what matters is that the top
+        // face can actually be stood on.
+        if (!level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) return false;
         return level.getBlockState(pos.north()).is(TamekindTags.WATER_BLOCKS)
                 || level.getBlockState(pos.south()).is(TamekindTags.WATER_BLOCKS)
                 || level.getBlockState(pos.east()).is(TamekindTags.WATER_BLOCKS)
