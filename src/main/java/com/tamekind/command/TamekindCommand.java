@@ -116,9 +116,11 @@ public final class TamekindCommand {
                 trust,
                 memory.activeTrustCount(now))), false);
         source.sendSuccess(() -> Component.literal(String.format(
-                "  leader=%s nearestAdult=%s",
+                "  leader=%s nearestAdult=%s isAlpha=%s temperament=%s",
                 formatAnimal(leader),
-                formatAnimal(adult))), false);
+                formatAnimal(adult),
+                leader == animal,
+                com.tamekind.ai.AnimalTemperament.forAnimal(animal).lowerName())), false);
         BlockPos home = memory.home();
         boolean guarding = memory.isGuarding(now);
         source.sendSuccess(() -> Component.literal(String.format(
@@ -232,6 +234,18 @@ public final class TamekindCommand {
         sb.append("\n  trustedPlayers=").append(m.activeTrustCount(now));
         Animal leader = HerdCoordinator.leaderFor(animal);
         sb.append("\n  leader=").append(formatAnimal(leader));
+        sb.append(" isAlpha=").append(leader == animal);
+        sb.append("\n  sentinel=").append(formatAnimal(HerdCoordinator.sentinelFor(animal)));
+        sb.append(" onWatch=").append(HerdCoordinator.sentinelFor(animal) == animal);
+        sb.append(" isolated=").append(HerdCoordinator.isIsolated(animal));
+        sb.append("\n  temperament=").append(com.tamekind.ai.AnimalTemperament.forAnimal(animal).lowerName());
+        sb.append(" inheritedScale=").append(Double.isNaN(m.inheritedScale()) ? "wild"
+                : String.format("%.3f", m.inheritedScale()));
+        sb.append(" trailPoints=").append(m.trailSize());
+        sb.append("\n  cullsWitnessed=").append(m.cullCount(now));
+        sb.append(" standsGround=").append(com.tamekind.ai.Disposition.standsGround(animal));
+        sb.append("\n  condition=").append(TamekindConfig.conditionEnabled
+                ? String.format("%.2f", m.condition()) : "disabled");
         source.sendSuccess(() -> Component.literal("[Tamekind] " + sb), false);
         return 1;
     }
@@ -267,10 +281,11 @@ public final class TamekindCommand {
         long now = level.getGameTime();
         BlockPos shared = leader == null ? null : AnimalMemoryStore.get(leader).sharedShelter(now);
         source.sendSuccess(() -> Component.literal(String.format(
-                "[Tamekind] %s#%d leader=%s herdSize=%d sharedShelter=%s",
+                "[Tamekind] %s#%d leader=%s isAlpha=%s herdSize=%d sharedShelter=%s",
                 animal.getType().toShortString(),
                 animal.getId(),
                 formatAnimal(leader),
+                leader == animal,
                 HerdCoordinator.herdSize(animal),
                 shared == null ? "none" : shared.getX() + " " + shared.getY() + " " + shared.getZ())), false);
         return 1;
