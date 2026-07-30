@@ -34,6 +34,24 @@ public final class AnimalMemory {
     private long sharedWaterUntil;
     private final Map<UUID, TrustEntry> trustedPlayers = new HashMap<>();
 
+    /** Scale inherited from both parents, or NaN when this animal was not bred. */
+    private double inheritedScale = Double.NaN;
+    /** Herd-mates seen killed recently; drives territorial retaliation. */
+    private int cullCount;
+    private long cullDecayAt;
+    /** While set, this animal stands its ground instead of fleeing. */
+    private long vengeanceUntil;
+    /** Body condition, 0..1. Only meaningful when {@code conditionEnabled}. */
+    private double condition = 1.0;
+    private long conditionTickedAt;
+
+    /**
+     * Recent alpha positions, oldest first. Transient on purpose: a stale trail
+     * across a reload would path followers at coordinates the leader left minutes ago.
+     */
+    private final java.util.ArrayDeque<BlockPos> trail = new java.util.ArrayDeque<>();
+    private long lastTrailAt;
+
     public void rememberDanger(Vec3 pos, long untilTick) {
         this.dangerPos = pos;
         this.dangerUntil = untilTick;
@@ -96,10 +114,105 @@ public final class AnimalMemory {
         sharedGrazeUntil = 0L;
         sharedWater = null;
         sharedWaterUntil = 0L;
+        cullCount = 0;
+        cullDecayAt = 0L;
+        vengeanceUntil = 0L;
+        trail.clear();
+        lastTrailAt = 0L;
+        // inheritedScale survives /tamekind forget: it is the animal's descent, not a
+        // memory it can be talked out of.
     }
 
     public void markGuarding(long untilTick) {
         if (untilTick > guardUntil) guardUntil = untilTick;
+    }
+
+    // ── Heritable size ────────────────────────────────────────────────────────
+
+    /** The bred-in scale, or NaN when this animal should fall back to its UUID seed. */
+    public double inheritedScale() {
+        return inheritedScale;
+    }
+
+    public void setInheritedScale(double scale) {
+        this.inheritedScale = scale;
+    }
+
+    // ── Territorial retaliation ───────────────────────────────────────────────
+
+    /**
+     * Records one herd-mate death. Returns the running count, which resets once the
+     * decay window lapses so a herd culled steadily over hours never accumulates.
+     */
+    public int recordCull(long gameTime, int decayTicks) {
+        if (gameTime > cullDecayAt) cullCount = 0;
+        cullCount++;
+        cullDecayAt = gameTime + Math.max(1, decayTicks);
+        return cullCount;
+    }
+
+    public int cullCount(long gameTime) {
+        return gameTime > cullDecayAt ? 0 : cullCount;
+    }
+
+    public void markVengeful(long untilTick) {
+        if (untilTick > vengeanceUntil) vengeanceUntil = untilTick;
+    }
+
+    /** True while this animal stands its ground rather than fleeing. */
+    public boolean isVengeful(long gameTime) {
+        return gameTime <= vengeanceUntil;
+    }
+
+    // ── Body condition (opt-in, non-lethal) ───────────────────────────────────
+
+    public double condition() {
+        return condition;
+    }
+
+    /**
+     * Drains condition at most once per {@code intervalTicks}. Never falls below the
+     * configured floor: condition slows and discourages an animal, it never kills one.
+     */
+    public void decayCondition(long gameTime, int intervalTicks, double amount, double floor) {
+        if (gameTime - conditionTickedAt < Math.max(1, intervalTicks)) return;
+        conditionTickedAt = gameTime;
+        condition = Math.max(floor, condition - amount);
+    }
+
+    public void restoreCondition(double amount) {
+        condition = Math.min(1.0, condition + amount);
+    }
+
+    // ── Alpha trail ───────────────────────────────────────────────────────────
+
+    /** Appends a trail point, rate-limited, keeping at most {@code maxPoints}. */
+    public void pushTrail(BlockPos pos, long gameTime, int everyTicks, int maxPoints) {
+        // The empty check has to come first: lastTrailAt starts at 0, so on a young world
+        // the rate limit would swallow the very first point and leave followers with
+        // nothing to walk.
+        if (!trail.isEmpty() && gameTime - lastTrailAt < Math.max(1, everyTicks)) return;
+        lastTrailAt = gameTime;
+        if (!trail.isEmpty() && trail.peekLast().distSqr(pos) < 4.0) return;
+        trail.addLast(pos.immutable());
+        while (trail.size() > Math.max(1, maxPoints)) trail.pollFirst();
+    }
+
+    /** The oldest recorded point still within {@code maxDistSqr} of the follower. */
+    public BlockPos trailPointFor(BlockPos follower, double maxDistSqr) {
+        for (BlockPos p : trail) {
+            if (follower.distSqr(p) <= maxDistSqr) return p;
+        }
+        return null;
+    }
+
+    public void clearTrail() {
+        trail.clear();
+    }
+
+    /** Number of recorded trail points. Surfaced for {@code /tamekind dump} and tests. */
+    public int trailSize() {
+        return trail.size();
     }
 
     public boolean isGuarding(long gameTime) {
@@ -171,6 +284,13 @@ public final class AnimalMemory {
         }
         if (guardUntil > 0) output.putLong("GuardUntil", guardUntil);
         if (nextDangerSpreadAt > 0) output.putLong("NextSpread", nextDangerSpreadAt);
+        if (!Double.isNaN(inheritedScale)) output.putDouble("InheritedScale", inheritedScale);
+        if (cullCount > 0) {
+            output.putInt("CullCount", cullCount);
+            output.putLong("CullDecayAt", cullDecayAt);
+        }
+        if (vengeanceUntil > 0) output.putLong("VengeanceUntil", vengeanceUntil);
+        if (condition < 1.0) output.putDouble("Condition", condition);
         if (sharedShelter != null && sharedShelterUntil > 0) {
             ValueOutput shared = output.child("SharedShelter");
             shared.putInt(X, sharedShelter.getX());
@@ -222,6 +342,14 @@ public final class AnimalMemory {
         sharedWater = null;
         sharedWaterUntil = 0L;
         trustedPlayers.clear();
+        trail.clear();
+        lastTrailAt = 0L;
+        inheritedScale = input.getDoubleOr("InheritedScale", Double.NaN);
+        cullCount = input.getIntOr("CullCount", 0);
+        cullDecayAt = input.getLongOr("CullDecayAt", 0L);
+        vengeanceUntil = input.getLongOr("VengeanceUntil", 0L);
+        condition = Math.min(1.0, Math.max(0.0, input.getDoubleOr("Condition", 1.0)));
+        conditionTickedAt = gameTime;
 
         ValueInput shared = input.childOrEmpty("SharedShelter");
         long sharedUntil = shared.getLongOr(UNTIL, 0L);
