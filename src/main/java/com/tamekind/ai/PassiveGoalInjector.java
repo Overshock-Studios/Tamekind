@@ -22,6 +22,7 @@ import com.tamekind.ai.goal.HabitatShelterGoal;
 import com.tamekind.ai.goal.HerdFollowGoal;
 import com.tamekind.ai.goal.PanicGoal;
 import com.tamekind.ai.goal.TamekindGoal;
+import com.tamekind.TamekindMod;
 import com.tamekind.config.TamekindConfig;
 import com.tamekind.mixin.MobGoalSelectorAccessor;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -33,7 +34,15 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.phys.AABB;
 
 public final class PassiveGoalInjector {
+    private static final java.util.concurrent.atomic.AtomicBoolean LOGGED_GOAL_TABLE =
+            new java.util.concurrent.atomic.AtomicBoolean();
+
     private PassiveGoalInjector() {
+    }
+
+    /** Lets {@code /tamekind reload} re-log the goal table after a config change. */
+    public static void resetGoalTableLog() {
+        LOGGED_GOAL_TABLE.set(false);
     }
 
     public static void register() {
@@ -127,28 +136,60 @@ public final class PassiveGoalInjector {
     private static void inject(Animal animal) {
         if (!TamekindConfig.enabled || hasTamekindGoal(animal)) return;
         MobGoalSelectorAccessor accessor = (MobGoalSelectorAccessor) animal;
-        accessor.tamekind$goalSelector().addGoal(0, new BabyAnchorGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(1, new PanicGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(2, new AlertFreezeGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(5, new HabitatShelterGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(6, new HerdFollowGoal(animal));
+        var selector = accessor.tamekind$goalSelector();
+        // Priorities and the reasoning behind each are in GoalPriorities. They are
+        // claims against a table vanilla already owns, not free choices.
+        selector.addGoal(GoalPriorities.BABY_ANCHOR, new BabyAnchorGoal(animal));
+        selector.addGoal(GoalPriorities.PANIC, new PanicGoal(animal));
+        selector.addGoal(GoalPriorities.ALERT_FREEZE, new AlertFreezeGoal(animal));
+        selector.addGoal(GoalPriorities.LOST_BABY, new LostBabyGoal(animal));
+        selector.addGoal(GoalPriorities.HERD_FOLLOW, new HerdFollowGoal(animal));
+        selector.addGoal(GoalPriorities.SHELTER, new HabitatShelterGoal(animal));
         // Above graze/drink on purpose: the alpha on watch must not put its head down.
-        accessor.tamekind$goalSelector().addGoal(7, new SentinelWatchGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(8, new GrazeRestGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(9, new DrinkGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(10, new HomeReturnGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(11, new MotherBondGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(3, new LostBabyGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(12, new FollowTrustedPlayerGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(13, new MatingDisplayGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(14, new PetIdleBondGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(15, new WallowGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(16, new MountObedienceGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(17, new PetDangerRelayGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(18, new AlphaPrideGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(19, new AgeScaleGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(20, new HerdTrailGoal(animal));
-        accessor.tamekind$goalSelector().addGoal(21, new ConditionGoal(animal));
+        selector.addGoal(GoalPriorities.SENTINEL, new SentinelWatchGoal(animal));
+        selector.addGoal(GoalPriorities.GRAZE, new GrazeRestGoal(animal));
+        selector.addGoal(GoalPriorities.DRINK, new DrinkGoal(animal));
+        selector.addGoal(GoalPriorities.HOME_RETURN, new HomeReturnGoal(animal));
+        selector.addGoal(GoalPriorities.MOTHER_BOND, new MotherBondGoal(animal));
+        selector.addGoal(GoalPriorities.FOLLOW_TRUSTED, new FollowTrustedPlayerGoal(animal));
+        selector.addGoal(GoalPriorities.MATING_DISPLAY, new MatingDisplayGoal(animal));
+        selector.addGoal(GoalPriorities.WALLOW, new WallowGoal(animal));
+        selector.addGoal(GoalPriorities.PET_DANGER_RELAY, new PetDangerRelayGoal(animal));
+        selector.addGoal(GoalPriorities.PET_IDLE_BOND, new PetIdleBondGoal(animal));
+        selector.addGoal(GoalPriorities.MOUNT_OBEDIENCE, new MountObedienceGoal(animal));
+        selector.addGoal(GoalPriorities.ALPHA_PRIDE, new AlphaPrideGoal(animal));
+        selector.addGoal(GoalPriorities.AGE_SCALE, new AgeScaleGoal(animal));
+        selector.addGoal(GoalPriorities.HERD_TRAIL, new HerdTrailGoal(animal));
+        selector.addGoal(GoalPriorities.CONDITION, new ConditionGoal(animal));
+
+        logGoalTableOnce(animal);
+    }
+
+    /**
+     * Logs the live goal table and any same-priority flag collisions for the first
+     * animal injected after a config load. One animal is enough — the table is identical
+     * per species — and doing it once keeps a busy farm from flooding the log.
+     */
+    private static void logGoalTableOnce(Animal animal) {
+        if (!TamekindConfig.debugLogs || !LOGGED_GOAL_TABLE.compareAndSet(false, true)) return;
+        TamekindMod.LOGGER.info("[Tamekind] goal table for {} (first injected animal):",
+                animal.getType().toShortString());
+        for (GoalDiagnostics.Entry e : GoalDiagnostics.inspect(animal)) {
+            TamekindMod.LOGGER.info("  {} {} {} [{}]",
+                    String.format("%3d", e.priority()),
+                    e.tamekind() ? "tamekind" : "        ",
+                    e.name(), e.flags());
+        }
+        var conflicts = GoalDiagnostics.conflicts(animal);
+        if (conflicts.isEmpty()) {
+            TamekindMod.LOGGER.info("  no same-priority flag collisions");
+            return;
+        }
+        for (GoalDiagnostics.Conflict c : conflicts) {
+            TamekindMod.LOGGER.warn("  COLLISION at priority {}: {} vs {} share {} "
+                            + "(the goal selector cannot break this tie)",
+                    c.priority(), c.first(), c.second(), c.sharedFlags());
+        }
     }
 
     private static boolean hasTamekindGoal(Animal animal) {

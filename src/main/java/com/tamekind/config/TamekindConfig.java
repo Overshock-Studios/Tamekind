@@ -132,6 +132,7 @@ public final class TamekindConfig {
     public static double conditionBreedThreshold = 0.5;
     public static double conditionSpeedPenalty = 0.25;
     public static boolean predatorTurfConflictEnabled = true;
+    public static boolean debugLogs = false;
 
     private TamekindConfig() {
     }
@@ -351,6 +352,7 @@ public final class TamekindConfig {
         conditionBreedThreshold = decimal(properties, "conditionBreedThreshold", conditionBreedThreshold);
         conditionSpeedPenalty = decimal(properties, "conditionSpeedPenalty", conditionSpeedPenalty);
         predatorTurfConflictEnabled = bool(properties, "predatorTurfConflictEnabled", predatorTurfConflictEnabled);
+        debugLogs = bool(properties, "debugLogs", debugLogs);
     }
 
     private static String toPropertiesText() {
@@ -631,6 +633,12 @@ public final class TamekindConfig {
                 # actual matchups live in tamekind:predators_of/<prey> and are fully
                 # datapack-overridable.
                 predatorTurfConflictEnabled=%s
+
+                # ── Debug ─────────────────────────────────────────────────
+                # If true, logs the live goal table and any same-priority flag
+                # collisions once per config load, and narrates behaviour switches.
+                # Use with /tamekind goals when diagnosing "this never happens".
+                debugLogs=%s
                 """.formatted(
                         enabled, herdEnabled, alertEnabled, panicEnabled, habitatEnabled, trustEnabled,
                         stampedeEnabled, babyAnchoringEnabled, breedingCrowdControlEnabled,
@@ -688,7 +696,8 @@ public final class TamekindConfig {
                         Double.toString(conditionDrinkRestore),
                         Double.toString(conditionBreedThreshold),
                         Double.toString(conditionSpeedPenalty),
-                        predatorTurfConflictEnabled);
+                        predatorTurfConflictEnabled,
+                        debugLogs);
     }
 
     private static boolean bool(Properties properties, String key, boolean fallback) {

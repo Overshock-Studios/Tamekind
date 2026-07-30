@@ -49,6 +49,8 @@ public final class TamekindCommand {
                                 .executes(TamekindCommand::forgetNearest))
                         .then(Commands.literal("dump")
                                 .executes(TamekindCommand::dumpNearest))
+                        .then(Commands.literal("goals")
+                                .executes(TamekindCommand::reportGoals))
                         .then(Commands.literal("trust")
                                 .executes(TamekindCommand::reportTrust)
                                 .then(Commands.literal("map")
@@ -250,6 +252,56 @@ public final class TamekindCommand {
         return 1;
     }
 
+    /**
+     * Dumps the nearest animal's live goal table with priorities, flags and running
+     * state, then flags every same-priority flag collision.
+     *
+     * <p>This reads the real selector, so it includes vanilla's goals and any other
+     * mod's — contention that no compile-time check can see. When a Tamekind behaviour
+     * "never happens", this is the first thing to look at: the cause is usually a goal
+     * at a strictly lower priority holding MOVE, not the behaviour's own conditions.
+     */
+    private static int reportGoals(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        ServerLevel level = source.getLevel();
+        AABB box = AABB.ofSize(source.getPosition(), ANIMAL_SCAN_SIZE, ANIMAL_SCAN_SIZE, ANIMAL_SCAN_SIZE);
+        Animal animal = level.getEntitiesOfClass(Animal.class, box).stream()
+                .min(Comparator.comparingDouble(c -> c.distanceToSqr(source.getPosition())))
+                .orElse(null);
+        if (animal == null) {
+            source.sendFailure(Component.literal("[Tamekind] No animal nearby."));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.literal(String.format(
+                "[Tamekind] goal table for %s#%d  (prio | owner | goal | flags | running)",
+                animal.getType().toShortString(), animal.getId())), false);
+        for (com.tamekind.ai.GoalDiagnostics.Entry e : com.tamekind.ai.GoalDiagnostics.inspect(animal)) {
+            source.sendSuccess(() -> Component.literal(String.format(
+                    "  %3d %-9s %-28s %-14s %s",
+                    e.priority(),
+                    e.tamekind() ? "tamekind" : "vanilla",
+                    e.name(),
+                    e.flags(),
+                    e.running() ? "RUNNING" : "")), false);
+        }
+
+        var conflicts = com.tamekind.ai.GoalDiagnostics.conflicts(animal);
+        if (conflicts.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("  no same-priority flag collisions"), false);
+            return 1;
+        }
+        source.sendSuccess(() -> Component.literal(String.format(
+                "  %d same-priority flag collision(s) - the selector cannot break these ties:",
+                conflicts.size())), false);
+        for (com.tamekind.ai.GoalDiagnostics.Conflict c : conflicts) {
+            source.sendSuccess(() -> Component.literal(String.format(
+                    "  COLLISION prio %d: %s vs %s share %s",
+                    c.priority(), c.first(), c.second(), c.sharedFlags())), false);
+        }
+        return 1;
+    }
+
     private static int forgetNearest(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack source = ctx.getSource();
         ServerLevel level = source.getLevel();
@@ -351,6 +403,9 @@ public final class TamekindCommand {
         CommandSourceStack source = ctx.getSource();
         try {
             TamekindConfig.load(net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("tamekind.properties"));
+            // Let the goal table be logged again, so toggling debugLogs on and reloading
+            // is enough to see it without restarting the server.
+            com.tamekind.ai.PassiveGoalInjector.resetGoalTableLog();
             source.sendSuccess(() -> Component.literal("[Tamekind] Config reloaded."), true);
             return 1;
         } catch (Exception e) {
