@@ -5,8 +5,15 @@
 Tamekind makes cows, sheep, pigs, horses, goats, llamas, rabbits, chickens, wolves, and foxes feel aware of the world. Herds elect alphas, packs share danger, parents shield calves, prey freezes or flees, and players who feed and care for animals earn a trust that survives world reloads — while leashes, name tags, breeding, mounts, and farms still behave exactly as vanilla expects.
 
 - Herd logic with deterministic alphas (visibly larger), leader-driven shelter and graze scans, follower piggybacking, panic spread with cooldown, and stampede knockback that respects farms and babies
+- Sentinel watch: while the herd grazes, the animal on duty keeps its head up, sweeps its gaze around, scans at a widened radius, and broadcasts danger to the herd the moment it spots something — and the shift rotates so nobody guards forever
+- Per-animal temperament (skittish / steady / bold / curious) derived from the entity UUID — no save data, stable across reloads — scaling alert radius, freeze length and how fast the animal learns to trust you
+- Heritable size: a bred calf is the midpoint of its parents, so selective breeding compounds across generations instead of rerolling every birth
+- Trail-following: followers walk the alpha's recorded route instead of beelining at it, so herds string out along walkable ground rather than clumping
+- Isolation stress for animals with no herd-mates in range, and territorial retaliation — a herd that has watched too many of its own die stops fleeing and holds its ground (it never fights back)
+- Predator turf conflict: wolves contest foxes, expressed entirely through the same `predators_of/<prey>` tags a datapack can rewrite
+- Optional body condition (off by default): drains slowly, restored by grazing and drinking, slows an animal and makes it decline to breed — floored and strictly non-lethal, so livestock can never starve while you're away
 - Alert → freeze → drift → panic state machine with sound cues, baby-slowed panic, dead-end avoidance, water-shore avoidance, soft-avoid penalties for crops/snow, and night-time light-seeking escapes
-- Trust and danger memory per player, with linear decay, hit-forgiveness for trusted players, idle-bond passive trust, herd trust sharing, and farm-friendly trust boosts on tame mounts and pets
+- Trust and danger memory per player, with linear decay, hit-forgiveness for trusted players, idle-bond passive trust, herd trust sharing, farm-friendly trust boosts on tame mounts and pets, and an approach-etiquette bonus for feeding while crouched
 - Habitat behavior: shelter in rain/storms, lit-area preference at night, midday shade for heat-sensitive species, water-edge drinking, grazing that eats grass, mud-wallowing pigs, nest-block chicken laying, mother-calf bonding, and group-sleep huddles
 - Per-spawn size variance (±25% by default) plus smooth age-based growth so calves visibly grow into adults, layered with an alpha pride bonus so the pack leader stands out
 - Two-way predator tag: prey listed in `tamekind:predators_of/<prey>` flees the predator AND wolves & foxes actively hunt them, turning datapack edits into a real food-web
@@ -31,6 +38,7 @@ Tamekind is data-driven — modpacks and datapacks can extend everything via `re
 - `list` — animal count within 64 blocks broken down by LOD
 - `leader` — nearest animal's pack alpha and current shared shelter
 - `trust` / `trust map <player>` — trust toward you / footprint of a player across nearby animals
+- `animal` / `dump` / `leader` also report `isAlpha` and the animal's `temperament`
 - `season` — current season and breeding-allowed status
 - `home set` / `home clear` — manage the nearest animal's home position
 - `forget` — wipe danger / home / guard / shared positions
