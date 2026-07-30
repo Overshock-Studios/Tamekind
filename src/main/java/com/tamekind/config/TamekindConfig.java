@@ -108,6 +108,30 @@ public final class TamekindConfig {
     public static String breedingSeason = "spring";
     public static double herdTrustShareMultiplier = 0.35;
     public static double trustedPlayerFleeReduction = 0.65;
+    public static boolean temperamentEnabled = true;
+    public static boolean sentinelEnabled = true;
+    public static int sentinelWatchTicks = 20 * 8;
+    public static double sentinelAlertRadiusMultiplier = 1.5;
+    public static double crouchFeedTrustMultiplier = 1.5;
+    public static boolean sentinelRotationEnabled = true;
+    public static boolean heritableSizeEnabled = true;
+    public static double heritableSizeJitter = 0.06;
+    public static boolean isolationStressEnabled = true;
+    public static double isolationAlertMultiplier = 1.3;
+    public static boolean territorialRetaliationEnabled = true;
+    public static int cullMemoryTicks = 20 * 60 * 5;
+    public static int cullVengeanceThreshold = 3;
+    public static int cullVengeanceTicks = 20 * 60 * 2;
+    public static int cullWitnessRadius = 16;
+    public static boolean conditionEnabled = false;
+    public static int conditionDecayIntervalTicks = 20 * 60;
+    public static double conditionDecayPerInterval = 0.02;
+    public static double conditionFloor = 0.25;
+    public static double conditionGrazeRestore = 0.35;
+    public static double conditionDrinkRestore = 0.35;
+    public static double conditionBreedThreshold = 0.5;
+    public static double conditionSpeedPenalty = 0.25;
+    public static boolean predatorTurfConflictEnabled = true;
 
     private TamekindConfig() {
     }
@@ -303,6 +327,30 @@ public final class TamekindConfig {
         breedingSeason = properties.getProperty("breedingSeason", breedingSeason).trim().toLowerCase(java.util.Locale.ROOT);
         herdTrustShareMultiplier = decimal(properties, "herdTrustShareMultiplier", herdTrustShareMultiplier);
         trustedPlayerFleeReduction = decimal(properties, "trustedPlayerFleeReduction", trustedPlayerFleeReduction);
+        temperamentEnabled = bool(properties, "temperamentEnabled", temperamentEnabled);
+        sentinelEnabled = bool(properties, "sentinelEnabled", sentinelEnabled);
+        sentinelWatchTicks = integer(properties, "sentinelWatchTicks", sentinelWatchTicks);
+        sentinelAlertRadiusMultiplier = decimal(properties, "sentinelAlertRadiusMultiplier", sentinelAlertRadiusMultiplier);
+        crouchFeedTrustMultiplier = decimal(properties, "crouchFeedTrustMultiplier", crouchFeedTrustMultiplier);
+        sentinelRotationEnabled = bool(properties, "sentinelRotationEnabled", sentinelRotationEnabled);
+        heritableSizeEnabled = bool(properties, "heritableSizeEnabled", heritableSizeEnabled);
+        heritableSizeJitter = decimal(properties, "heritableSizeJitter", heritableSizeJitter);
+        isolationStressEnabled = bool(properties, "isolationStressEnabled", isolationStressEnabled);
+        isolationAlertMultiplier = decimal(properties, "isolationAlertMultiplier", isolationAlertMultiplier);
+        territorialRetaliationEnabled = bool(properties, "territorialRetaliationEnabled", territorialRetaliationEnabled);
+        cullMemoryTicks = integer(properties, "cullMemoryTicks", cullMemoryTicks);
+        cullVengeanceThreshold = integer(properties, "cullVengeanceThreshold", cullVengeanceThreshold);
+        cullVengeanceTicks = integer(properties, "cullVengeanceTicks", cullVengeanceTicks);
+        cullWitnessRadius = integer(properties, "cullWitnessRadius", cullWitnessRadius);
+        conditionEnabled = bool(properties, "conditionEnabled", conditionEnabled);
+        conditionDecayIntervalTicks = integer(properties, "conditionDecayIntervalTicks", conditionDecayIntervalTicks);
+        conditionDecayPerInterval = decimal(properties, "conditionDecayPerInterval", conditionDecayPerInterval);
+        conditionFloor = decimal(properties, "conditionFloor", conditionFloor);
+        conditionGrazeRestore = decimal(properties, "conditionGrazeRestore", conditionGrazeRestore);
+        conditionDrinkRestore = decimal(properties, "conditionDrinkRestore", conditionDrinkRestore);
+        conditionBreedThreshold = decimal(properties, "conditionBreedThreshold", conditionBreedThreshold);
+        conditionSpeedPenalty = decimal(properties, "conditionSpeedPenalty", conditionSpeedPenalty);
+        predatorTurfConflictEnabled = bool(properties, "predatorTurfConflictEnabled", predatorTurfConflictEnabled);
     }
 
     private static String toPropertiesText() {
@@ -501,6 +549,88 @@ public final class TamekindConfig {
                 alphaScaleBonus=%s
                 # Minimum herd size (including self) before the alpha bonus applies.
                 alphaMinHerdSize=%d
+
+                # ── Temperament ───────────────────────────────────────────────────
+                # If true, each animal gets a deterministic personality (skittish,
+                # steady, bold, curious) derived from its UUID. Temperament scales
+                # alert radius, freeze length and how fast it learns to trust you.
+                # Purely behavioral: no items, no drops, no entity replacement.
+                temperamentEnabled=%s
+
+                # ── Sentinel watch ────────────────────────────────────────────────
+                # If true, the herd alpha stands watch while the herd grazes or rests
+                # instead of eating, and broadcasts danger to the herd as soon as it
+                # spots a threat.
+                sentinelEnabled=%s
+                # How long a watch shift lasts, in ticks (a random equal amount is added).
+                sentinelWatchTicks=%d
+                # Multiplier on alertRadius while standing watch.
+                sentinelAlertRadiusMultiplier=%s
+                # Trust multiplier when the feeding player is crouching. Approach
+                # calmly and the animal bonds faster.
+                crouchFeedTrustMultiplier=%s
+                # If true, the watch rotates through the herd's adults on a timer so the
+                # alpha eventually gets to eat. If false, the alpha watches every shift.
+                sentinelRotationEnabled=%s
+
+                # ── Heritable size ────────────────────────────────────────────────
+                # If true, a bred calf's size is the average of its parents' sizes
+                # instead of a fresh roll, so selective breeding actually compounds.
+                # Requires sizeVarianceEnabled.
+                heritableSizeEnabled=%s
+                # Random +/- wobble applied on top of the parent average, so a line
+                # still drifts instead of locking to one value forever.
+                heritableSizeJitter=%s
+
+                # ── Isolation stress ──────────────────────────────────────────────
+                # If true, a herd animal with no herd-mates in range is jumpier and
+                # settles down to graze less readily.
+                isolationStressEnabled=%s
+                # Alert/panic radius multiplier applied while isolated.
+                isolationAlertMultiplier=%s
+
+                # ── Territorial retaliation ───────────────────────────────────────
+                # If true, animals that repeatedly watch herd-mates die nearby stop
+                # fleeing and stand their ground instead. They never fight back; this
+                # only suppresses panic.
+                territorialRetaliationEnabled=%s
+                # How long a witnessed death is remembered. Deaths spread further apart
+                # than this never accumulate.
+                cullMemoryTicks=%d
+                # Deaths witnessed within that window before an animal turns defiant.
+                cullVengeanceThreshold=%d
+                # How long the stand-your-ground state lasts.
+                cullVengeanceTicks=%d
+                # Radius in which herd-mates witness a death.
+                cullWitnessRadius=%d
+
+                # ── Body condition (opt-in) ───────────────────────────────────────
+                # Off by default. When true, animals carry a 0..1 condition that drains
+                # slowly and is restored by grazing and drinking. Deliberately NON-LETHAL:
+                # low condition slows an animal and makes it decline to breed, and never
+                # damages or kills it, so livestock cannot starve while you are away.
+                conditionEnabled=%s
+                # Ticks between drain steps.
+                conditionDecayIntervalTicks=%d
+                # Condition lost per drain step.
+                conditionDecayPerInterval=%s
+                # Condition can never fall below this. Keep above 0 to guarantee that a
+                # neglected animal is merely sluggish, not doomed.
+                conditionFloor=%s
+                # Condition restored by a completed graze / drink.
+                conditionGrazeRestore=%s
+                conditionDrinkRestore=%s
+                # Below this condition an animal declines to mate.
+                conditionBreedThreshold=%s
+                # Maximum fraction of speed lost at the condition floor.
+                conditionSpeedPenalty=%s
+
+                # ── Predator turf conflict ────────────────────────────────────────
+                # If true, ship the default rival entries so tagged predators contest
+                # each other (wolves harass foxes) instead of only hunting prey. The
+                # actual matchups live in tamekind:predators_of/<prey> and are fully
+                # datapack-overridable.
+                predatorTurfConflictEnabled=%s
                 """.formatted(
                         enabled, herdEnabled, alertEnabled, panicEnabled, habitatEnabled, trustEnabled,
                         stampedeEnabled, babyAnchoringEnabled, breedingCrowdControlEnabled,
@@ -541,7 +671,24 @@ public final class TamekindConfig {
                         ageScalingEnabled, Double.toString(babyStartScaleMultiplier),
                         scaredNoCoverEnabled, scaredNoCoverDurationTicks,
                         lightningPanicEnabled, lightningPanicRadius,
-                        Double.toString(alphaScaleBonus), alphaMinHerdSize);
+                        Double.toString(alphaScaleBonus), alphaMinHerdSize,
+                        temperamentEnabled,
+                        sentinelEnabled, sentinelWatchTicks,
+                        Double.toString(sentinelAlertRadiusMultiplier),
+                        Double.toString(crouchFeedTrustMultiplier),
+                        sentinelRotationEnabled,
+                        heritableSizeEnabled, Double.toString(heritableSizeJitter),
+                        isolationStressEnabled, Double.toString(isolationAlertMultiplier),
+                        territorialRetaliationEnabled, cullMemoryTicks,
+                        cullVengeanceThreshold, cullVengeanceTicks, cullWitnessRadius,
+                        conditionEnabled, conditionDecayIntervalTicks,
+                        Double.toString(conditionDecayPerInterval),
+                        Double.toString(conditionFloor),
+                        Double.toString(conditionGrazeRestore),
+                        Double.toString(conditionDrinkRestore),
+                        Double.toString(conditionBreedThreshold),
+                        Double.toString(conditionSpeedPenalty),
+                        predatorTurfConflictEnabled);
     }
 
     private static boolean bool(Properties properties, String key, boolean fallback) {
