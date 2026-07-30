@@ -42,9 +42,6 @@ public final class ThreatScanner {
                 best = entity;
             }
         }
-        if (best != null && best instanceof net.minecraft.world.entity.Mob mob) {
-            mob.setShiftKeyDown(true);
-        }
         return best;
     }
 
