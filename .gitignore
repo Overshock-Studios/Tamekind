@@ -1,12 +1,52 @@
+# Gradle
 .gradle/
 build/
-run/
-bin/
 out/
+!gradle/wrapper/gradle-wrapper.jar
 
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.settings/
+.classpath
+.project
+bin/
+
+# Local Server / Run Directory
+run/
+logs/
+crash-reports/
+usercache.json
+banned-ips.json
+banned-players.json
+ops.json
+whitelist.json
+server.properties
+eula.txt
+
+# Datagen output. The shipped tags are the hand-written ones under
+# src/main/resources/data/tamekind/tags — see docs/PORTING-26.2.md.
+src/main/generated/
+
+# OS Generated
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
 *.class
 *.log
 
-.idea/
-.vscode/
-*.iml
+# graphify knowledge graph (regenerated locally)
+graphify-out/
+
+# Claude Code personal settings
+.claude/settings.local.json
