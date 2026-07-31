@@ -15,6 +15,7 @@ public final class DangerBroadcaster {
         long until = now + TamekindConfig.memoryTicks;
         AnimalMemory memory = AnimalMemoryStore.get(source);
         memory.rememberDanger(danger, until);
+        com.tamekind.api.TamekindEvents.ALARMED.invoker().onAlarmed(source, danger);
         if (!memory.canSpreadDanger(now, TamekindConfig.herdDangerSpreadCooldownTicks)) {
             return;
         }
@@ -28,6 +29,7 @@ public final class DangerBroadcaster {
         for (Animal herdMate : level.getEntitiesOfClass(Animal.class, box, other ->
                 other.isAlive() && other != source && other.getType() == source.getType())) {
             AnimalMemoryStore.get(herdMate).rememberDanger(danger, until);
+            com.tamekind.api.TamekindEvents.ALARMED.invoker().onAlarmed(herdMate, danger);
         }
     }
 }

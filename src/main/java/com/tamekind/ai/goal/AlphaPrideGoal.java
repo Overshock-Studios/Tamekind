@@ -71,6 +71,7 @@ public final class AlphaPrideGoal extends Goal implements TamekindGoal {
         attr.addOrUpdateTransientModifier(new AttributeModifier(
                 MODIFIER_ID, TamekindConfig.alphaScaleBonus, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
         applied = true;
+        com.tamekind.api.TamekindEvents.ALPHA_CHANGED.invoker().onAlphaChanged(animal, true);
         logScale("alpha bonus applied");
     }
 
@@ -80,6 +81,7 @@ public final class AlphaPrideGoal extends Goal implements TamekindGoal {
         if (attr != null) attr.removeModifier(MODIFIER_ID);
         applied = false;
         demotions = 0;
+        com.tamekind.api.TamekindEvents.ALPHA_CHANGED.invoker().onAlphaChanged(animal, false);
         logScale("alpha bonus removed (" + why + ")");
     }
 

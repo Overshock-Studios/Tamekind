@@ -56,7 +56,7 @@ public final class PassiveEventDirector {
         if (attacker instanceof Player player && TamekindConfig.trustEnabled) {
             double trust = AnimalMemoryStore.get(animal).trustScore(player.getUUID(), animal.level().getGameTime());
             if (trust >= TamekindConfig.trustHitForgivenessThreshold) forgive = true;
-            AnimalMemoryStore.get(animal).removeTrust(player.getUUID(), TamekindConfig.trustLossPerHit);
+            AnimalMemoryStore.removeTrust(animal, player.getUUID(), TamekindConfig.trustLossPerHit);
         }
         if (!forgive) {
             Vec3 danger = dangerPosition(animal, source);

@@ -11,9 +11,10 @@
   "environment": "*",
   "entrypoints": {
     "fabric-gametest": [
+      "com.tamekind.gametest.ApiGameTest",
       "com.tamekind.gametest.HerdGameTest",
-      "com.tamekind.gametest.PredatorGameTest",
-      "com.tamekind.gametest.MemoryGameTest"
+      "com.tamekind.gametest.MemoryGameTest",
+      "com.tamekind.gametest.PredatorGameTest"
     ]
   },
   "depends": {

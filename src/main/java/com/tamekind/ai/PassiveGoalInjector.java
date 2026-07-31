@@ -86,17 +86,15 @@ public final class PassiveGoalInjector {
                 double gain = TamekindConfig.trustPerFeeding
                         * AnimalTemperament.forAnimal(animal).trustGainMultiplier();
                 if (player.isShiftKeyDown()) gain *= TamekindConfig.crouchFeedTrustMultiplier;
-                AnimalMemoryStore.get(animal).addTrust(player.getUUID(), gain, until);
+                AnimalMemoryStore.addTrust(animal, player.getUUID(), gain, until);
                 double existingTrust = AnimalMemoryStore.get(animal).trustScore(player.getUUID(), level.getGameTime());
                 if (existingTrust >= TamekindConfig.calmerBreedingTrustThreshold
                         && !animal.isInLove() && !animal.isBaby()) {
                     animal.setInLoveTime(TamekindConfig.calmerBreedingLoveTicks);
                 }
                 for (Animal herdMate : HerdCoordinator.nearbyHerd(animal)) {
-                    AnimalMemoryStore.get(herdMate).addTrust(
-                            player.getUUID(),
-                            gain * TamekindConfig.herdTrustShareMultiplier,
-                            until);
+                    AnimalMemoryStore.addTrust(herdMate, player.getUUID(),
+                            gain * TamekindConfig.herdTrustShareMultiplier, until);
                 }
             }
             return InteractionResult.PASS;
