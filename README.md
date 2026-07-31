@@ -58,6 +58,18 @@ Tamekind is server-side and can be added to an existing world.
 - **Vanilla jockey assembly**: baby hostile mobs at mount range are exempt from panic so chicken-jockeys and Warband-spawned jockey formations finish mounting cleanly.
 - **Tamed pets** (wolves, cats, foxes, parrots, ocelots): excluded from Tamekind movement goals by default so they keep their vanilla owner-following AI.
 
+## For mod developers
+
+Tamekind exposes a stable, read-only API in `com.tamekind.api`: herd and alpha queries,
+temperament, trust, alarm state, and three server-side Fabric events. Use it as a soft
+dependency with `modCompileOnly` and guard calls with `isModLoaded("tamekind")`.
+
+Tamekind is the only mod in this niche with a herd layer, so "who is this animal's alpha"
+is a question nobody else can answer. If you want to *influence* rather than observe, the
+datapack tags are the supported route and need no code at all.
+
+See the [wiki](../../wiki) for the API reference, the tag list and the compatibility notes.
+
 ## License
 
 MIT.
