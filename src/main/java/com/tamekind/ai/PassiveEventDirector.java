@@ -1,5 +1,6 @@
 package com.tamekind.ai;
 
+import com.tamekind.TamekindMod;
 import com.tamekind.config.TamekindConfig;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -48,6 +49,7 @@ public final class PassiveEventDirector {
     private static void afterDamage(LivingEntity entity, DamageSource source,
                                     float baseDamageTaken, float damageTaken, boolean blocked) {
         if (!TamekindConfig.enabled || !(entity instanceof Animal animal)) return;
+        logDamage(animal, source, damageTaken);
         if (damageTaken <= 0.0f && !source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) return;
         Entity attacker = source.getEntity();
         boolean forgive = false;
@@ -69,6 +71,29 @@ public final class PassiveEventDirector {
                 AnimalMemoryStore.get(adult).markGuarding(until);
             }
         }
+    }
+
+    /**
+     * Names the exact damage type and attacker for every hit an animal takes.
+     *
+     * <p>"Animals are randomly taking damage" is not diagnosable from behaviour alone:
+     * a wolf hunting, suffocation from a resized hitbox and a cactus all look the same
+     * from across a field. This prints which one it is, plus the animal's current scale,
+     * because scale changes the hitbox and is the thing most likely to cause IN_WALL.
+     */
+    private static void logDamage(Animal animal, DamageSource source, float amount) {
+        if (!TamekindConfig.debugLogs) return;
+        Entity attacker = source.getEntity();
+        var scale = animal.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+        TamekindMod.LOGGER.info(
+                "[Tamekind] DAMAGE {}#{} amount={} type={} attacker={} scale={} hp={}/{}",
+                animal.getType().toShortString(), animal.getId(),
+                String.format("%.2f", amount),
+                source.type().msgId(),
+                attacker == null ? "none" : attacker.getType().toShortString(),
+                scale == null ? "?" : String.format("%.3f", scale.getValue()),
+                String.format("%.1f", animal.getHealth()),
+                String.format("%.1f", animal.getMaxHealth()));
     }
 
     private static Vec3 dangerPosition(Animal animal, DamageSource source) {

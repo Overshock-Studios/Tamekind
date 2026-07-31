@@ -245,6 +245,14 @@ public final class TamekindCommand {
         sb.append("\n  sentinel=").append(formatAnimal(HerdCoordinator.sentinelFor(animal)));
         sb.append(" onWatch=").append(HerdCoordinator.sentinelFor(animal) == animal);
         sb.append(" isolated=").append(HerdCoordinator.isIsolated(animal));
+        var scaleAttr = animal.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+        if (scaleAttr != null) {
+            // Base is the per-spawn or inherited size; final adds the age and alpha
+            // modifiers. A gap that keeps moving is the alpha bonus flickering.
+            sb.append("\n  scaleBase=").append(String.format("%.3f", scaleAttr.getBaseValue()));
+            sb.append(" scaleFinal=").append(String.format("%.3f", scaleAttr.getValue()));
+            sb.append(" modifiers=").append(scaleAttr.getModifiers().size());
+        }
         sb.append("\n  temperament=").append(AnimalTemperament.forAnimal(animal).lowerName());
         sb.append(" inheritedScale=").append(Double.isNaN(m.inheritedScale()) ? "wild"
                 : String.format("%.3f", m.inheritedScale()));
