@@ -35,9 +35,23 @@ sourceSets {
             srcDirs += ['src/main/generated']
         }
     }
+    // In-world tests. Deliberately a separate source set with its own fabric.mod.json,
+    // so the `fabric-gametest` entrypoint and the test classes never reach the released
+    // jar. Putting that entrypoint in the main mod would make production reference
+    // classes that are not shipped.
+    gametest {
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+    }
 }
 
 loom {
+    // Register the gametest source set as its own mod for the dev runtime only.
+    mods {
+        register("tamekind") { sourceSet sourceSets.main }
+        register("tamekind-gametest") { sourceSet sourceSets.gametest }
+    }
+
     runs {
         datagen {
             inherit server
@@ -47,7 +61,24 @@ loom {
             vmArg "-Dfabric-api.datagen.modid=tamekind"
             runDir "build/datagen"
         }
+        gametest {
+            inherit server
+            name "Game Test"
+            source sourceSets.gametest
+            vmArg "-Dfabric-api.gametest"
+            vmArg "-Dfabric-api.gametest.report-file=${file('build/gametest/report.xml')}"
+            runDir "build/gametest"
+        }
     }
+}
+
+// `gradlew runGametest` launches a headless server, runs the in-world tests and writes a
+// JUnit XML report. Kept out of `check` on purpose: it boots Minecraft, which is far too
+// slow for the ordinary build.
+tasks.register('gametest') {
+    group = 'verification'
+    description = 'Runs the in-world game tests on a headless server.'
+    dependsOn tasks.named('runGametest')
 }
 
 java {
