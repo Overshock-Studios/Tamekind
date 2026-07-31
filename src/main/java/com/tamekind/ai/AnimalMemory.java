@@ -1,8 +1,6 @@
 package com.tamekind.ai;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
@@ -11,15 +9,110 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class AnimalMemory {
-    private static final String DANGER = "Danger";
-    private static final String HOME = "Home";
-    private static final String TRUST = "Trust";
-    private static final String X = "X";
-    private static final String Y = "Y";
-    private static final String Z = "Z";
-    private static final String UNTIL = "Until";
-    private static final String SCORE = "Score";
-    private static final String PLAYER = "Player";
+
+    /** A position with an expiry, which is the shape of most of this class. */
+    private record Timed<P>(P pos, long until) {
+        static <P> com.mojang.serialization.Codec<Timed<P>> codec(
+                com.mojang.serialization.Codec<P> posCodec) {
+            return com.mojang.serialization.codecs.RecordCodecBuilder.create(i -> i.group(
+                    posCodec.fieldOf("Pos").forGetter(Timed::pos),
+                    com.mojang.serialization.Codec.LONG.fieldOf("Until").forGetter(Timed::until)
+            ).apply(i, Timed::new));
+        }
+    }
+
+    private record Trust(java.util.UUID player, double score, long until) {
+        static final com.mojang.serialization.Codec<Trust> CODEC =
+                com.mojang.serialization.codecs.RecordCodecBuilder.create(i -> i.group(
+                        net.minecraft.core.UUIDUtil.CODEC.fieldOf("Player").forGetter(Trust::player),
+                        com.mojang.serialization.Codec.DOUBLE.fieldOf("Score").forGetter(Trust::score),
+                        com.mojang.serialization.Codec.LONG.fieldOf("Until").forGetter(Trust::until)
+                ).apply(i, Trust::new));
+    }
+
+    private static final com.mojang.serialization.Codec<Timed<Vec3>> DANGER_CODEC =
+            Timed.codec(Vec3.CODEC);
+    private static final com.mojang.serialization.Codec<Timed<BlockPos>> SHARED_CODEC =
+            Timed.codec(BlockPos.CODEC);
+
+    /**
+     * Persistence for the Fabric attachment this lives in.
+     *
+     * <p>Every field is optional with a sane default, so an animal from a world saved
+     * before this existed decodes cleanly rather than failing and losing its memory. The
+     * trail is deliberately absent: it is transient by design, and a stale route is worse
+     * than no route.
+     */
+    public static final com.mojang.serialization.Codec<AnimalMemory> CODEC =
+            com.mojang.serialization.codecs.RecordCodecBuilder.create(i -> i.group(
+                    DANGER_CODEC.optionalFieldOf("Danger").forGetter(m ->
+                            m.dangerPos == null ? java.util.Optional.<Timed<Vec3>>empty()
+                                    : java.util.Optional.of(new Timed<>(m.dangerPos, m.dangerUntil))),
+                    BlockPos.CODEC.optionalFieldOf("Home").forGetter(m ->
+                            java.util.Optional.ofNullable(m.homePos)),
+                    SHARED_CODEC.optionalFieldOf("SharedShelter").forGetter(m ->
+                            m.sharedShelter == null ? java.util.Optional.<Timed<BlockPos>>empty()
+                                    : java.util.Optional.of(new Timed<>(m.sharedShelter, m.sharedShelterUntil))),
+                    SHARED_CODEC.optionalFieldOf("SharedGraze").forGetter(m ->
+                            m.sharedGraze == null ? java.util.Optional.<Timed<BlockPos>>empty()
+                                    : java.util.Optional.of(new Timed<>(m.sharedGraze, m.sharedGrazeUntil))),
+                    SHARED_CODEC.optionalFieldOf("SharedWater").forGetter(m ->
+                            m.sharedWater == null ? java.util.Optional.<Timed<BlockPos>>empty()
+                                    : java.util.Optional.of(new Timed<>(m.sharedWater, m.sharedWaterUntil))),
+                    com.mojang.serialization.Codec.LONG.optionalFieldOf("GuardUntil", 0L)
+                            .forGetter(m -> m.guardUntil),
+                    com.mojang.serialization.Codec.LONG.optionalFieldOf("NextSpread", 0L)
+                            .forGetter(m -> m.nextDangerSpreadAt),
+                    com.mojang.serialization.Codec.LONG.optionalFieldOf("VengeanceUntil", 0L)
+                            .forGetter(m -> m.vengeanceUntil),
+                    com.mojang.serialization.Codec.LONG.optionalFieldOf("CullDecayAt", 0L)
+                            .forGetter(m -> m.cullDecayAt),
+                    com.mojang.serialization.Codec.INT.optionalFieldOf("CullCount", 0)
+                            .forGetter(m -> m.cullCount),
+                    // Absent means a wild roll, which is why this is Optional and not a
+                    // NaN written into the save file.
+                    com.mojang.serialization.Codec.DOUBLE.optionalFieldOf("InheritedScale")
+                            .forGetter(m -> Double.isNaN(m.inheritedScale)
+                                    ? java.util.Optional.<Double>empty()
+                                    : java.util.Optional.of(m.inheritedScale)),
+                    com.mojang.serialization.Codec.DOUBLE.optionalFieldOf("Condition", 1.0)
+                            .forGetter(m -> m.condition),
+                    Trust.CODEC.listOf().optionalFieldOf("Trust", java.util.List.of())
+                            .forGetter(m -> m.trustedPlayers.entrySet().stream()
+                                    .map(e -> new Trust(e.getKey(), e.getValue().score(), e.getValue().untilTick()))
+                                    .toList())
+            ).apply(i, AnimalMemory::fromCodec));
+
+    private static AnimalMemory fromCodec(
+            java.util.Optional<Timed<Vec3>> danger,
+            java.util.Optional<BlockPos> home,
+            java.util.Optional<Timed<BlockPos>> shelter,
+            java.util.Optional<Timed<BlockPos>> graze,
+            java.util.Optional<Timed<BlockPos>> water,
+            long guardUntil, long nextSpread, long vengeanceUntil, long cullDecayAt,
+            int cullCount, java.util.Optional<Double> inheritedScale, double condition,
+            java.util.List<Trust> trust) {
+        AnimalMemory m = new AnimalMemory();
+        danger.ifPresent(d -> { m.dangerPos = d.pos(); m.dangerUntil = d.until(); });
+        home.ifPresent(p -> m.homePos = p);
+        shelter.ifPresent(d -> { m.sharedShelter = d.pos(); m.sharedShelterUntil = d.until(); });
+        graze.ifPresent(d -> { m.sharedGraze = d.pos(); m.sharedGrazeUntil = d.until(); });
+        water.ifPresent(d -> { m.sharedWater = d.pos(); m.sharedWaterUntil = d.until(); });
+        m.guardUntil = guardUntil;
+        m.nextDangerSpreadAt = nextSpread;
+        m.vengeanceUntil = vengeanceUntil;
+        m.cullDecayAt = cullDecayAt;
+        m.cullCount = cullCount;
+        m.inheritedScale = inheritedScale.orElse(Double.NaN);
+        m.condition = Math.min(1.0, Math.max(0.0, condition));
+        for (Trust t : trust) {
+            if (t.score() > 0.0) {
+                m.trustedPlayers.put(t.player(), new TrustEntry(Math.min(1.0, t.score()), t.until()));
+            }
+        }
+        return m;
+    }
+
 
     private Vec3 dangerPos;
     private long dangerUntil;
@@ -274,142 +367,7 @@ public final class AnimalMemory {
         }
     }
 
-    public void save(ValueOutput output) {
-        if (dangerPos != null) {
-            ValueOutput danger = output.child(DANGER);
-            danger.putDouble(X, dangerPos.x);
-            danger.putDouble(Y, dangerPos.y);
-            danger.putDouble(Z, dangerPos.z);
-            danger.putLong(UNTIL, dangerUntil);
-        }
-        if (guardUntil > 0) output.putLong("GuardUntil", guardUntil);
-        if (nextDangerSpreadAt > 0) output.putLong("NextSpread", nextDangerSpreadAt);
-        if (!Double.isNaN(inheritedScale)) output.putDouble("InheritedScale", inheritedScale);
-        if (cullCount > 0) {
-            output.putInt("CullCount", cullCount);
-            output.putLong("CullDecayAt", cullDecayAt);
-        }
-        if (vengeanceUntil > 0) output.putLong("VengeanceUntil", vengeanceUntil);
-        if (condition < 1.0) output.putDouble("Condition", condition);
-        if (sharedShelter != null && sharedShelterUntil > 0) {
-            ValueOutput shared = output.child("SharedShelter");
-            shared.putInt(X, sharedShelter.getX());
-            shared.putInt(Y, sharedShelter.getY());
-            shared.putInt(Z, sharedShelter.getZ());
-            shared.putLong(UNTIL, sharedShelterUntil);
-        }
-        if (sharedGraze != null && sharedGrazeUntil > 0) {
-            ValueOutput shared = output.child("SharedGraze");
-            shared.putInt(X, sharedGraze.getX());
-            shared.putInt(Y, sharedGraze.getY());
-            shared.putInt(Z, sharedGraze.getZ());
-            shared.putLong(UNTIL, sharedGrazeUntil);
-        }
-        if (sharedWater != null && sharedWaterUntil > 0) {
-            ValueOutput shared = output.child("SharedWater");
-            shared.putInt(X, sharedWater.getX());
-            shared.putInt(Y, sharedWater.getY());
-            shared.putInt(Z, sharedWater.getZ());
-            shared.putLong(UNTIL, sharedWaterUntil);
-        }
-        if (homePos != null) {
-            ValueOutput home = output.child(HOME);
-            home.putInt(X, homePos.getX());
-            home.putInt(Y, homePos.getY());
-            home.putInt(Z, homePos.getZ());
-        }
-        if (!trustedPlayers.isEmpty()) {
-            ValueOutput.ValueOutputList trust = output.childrenList(TRUST);
-            for (Map.Entry<UUID, TrustEntry> entry : trustedPlayers.entrySet()) {
-                ValueOutput saved = trust.addChild();
-                saved.putString(PLAYER, entry.getKey().toString());
-                saved.putDouble(SCORE, entry.getValue().score);
-                saved.putLong(UNTIL, entry.getValue().untilTick);
-            }
-        }
-    }
 
-    public void load(ValueInput input, long gameTime) {
-        dangerPos = null;
-        dangerUntil = 0L;
-        homePos = null;
-        guardUntil = input.getLongOr("GuardUntil", 0L);
-        nextDangerSpreadAt = input.getLongOr("NextSpread", 0L);
-        sharedShelter = null;
-        sharedShelterUntil = 0L;
-        sharedGraze = null;
-        sharedGrazeUntil = 0L;
-        sharedWater = null;
-        sharedWaterUntil = 0L;
-        trustedPlayers.clear();
-        trail.clear();
-        lastTrailAt = 0L;
-        inheritedScale = input.getDoubleOr("InheritedScale", Double.NaN);
-        cullCount = input.getIntOr("CullCount", 0);
-        cullDecayAt = input.getLongOr("CullDecayAt", 0L);
-        vengeanceUntil = input.getLongOr("VengeanceUntil", 0L);
-        condition = Math.min(1.0, Math.max(0.0, input.getDoubleOr("Condition", 1.0)));
-        conditionTickedAt = gameTime;
-
-        ValueInput shared = input.childOrEmpty("SharedShelter");
-        long sharedUntil = shared.getLongOr(UNTIL, 0L);
-        if (sharedUntil > gameTime) {
-            sharedShelter = new BlockPos(
-                    shared.getIntOr(X, 0),
-                    shared.getIntOr(Y, 0),
-                    shared.getIntOr(Z, 0));
-            sharedShelterUntil = sharedUntil;
-        }
-
-        ValueInput sg = input.childOrEmpty("SharedGraze");
-        long sgUntil = sg.getLongOr(UNTIL, 0L);
-        if (sgUntil > gameTime) {
-            sharedGraze = new BlockPos(
-                    sg.getIntOr(X, 0),
-                    sg.getIntOr(Y, 0),
-                    sg.getIntOr(Z, 0));
-            sharedGrazeUntil = sgUntil;
-        }
-
-        ValueInput sw = input.childOrEmpty("SharedWater");
-        long swUntil = sw.getLongOr(UNTIL, 0L);
-        if (swUntil > gameTime) {
-            sharedWater = new BlockPos(
-                    sw.getIntOr(X, 0),
-                    sw.getIntOr(Y, 0),
-                    sw.getIntOr(Z, 0));
-            sharedWaterUntil = swUntil;
-        }
-
-        ValueInput home = input.childOrEmpty(HOME);
-        int hx = home.getIntOr(X, Integer.MIN_VALUE);
-        if (hx != Integer.MIN_VALUE) {
-            homePos = new BlockPos(hx, home.getIntOr(Y, 0), home.getIntOr(Z, 0));
-        }
-
-        ValueInput danger = input.childOrEmpty(DANGER);
-        long savedDangerUntil = danger.getLongOr(UNTIL, 0L);
-        if (savedDangerUntil > gameTime) {
-            dangerPos = new Vec3(
-                    danger.getDoubleOr(X, 0.0),
-                    danger.getDoubleOr(Y, 0.0),
-                    danger.getDoubleOr(Z, 0.0));
-            dangerUntil = savedDangerUntil;
-        }
-
-        for (ValueInput saved : input.childrenListOrEmpty(TRUST)) {
-            try {
-                UUID uuid = UUID.fromString(saved.getStringOr(PLAYER, ""));
-                double score = saved.getDoubleOr(SCORE, 0.0);
-                long until = saved.getLongOr(UNTIL, 0L);
-                if (score > 0.0 && until > gameTime) {
-                    trustedPlayers.put(uuid, new TrustEntry(Math.min(1.0, score), until));
-                }
-            } catch (IllegalArgumentException ignored) {
-                // Ignore malformed third-party or old data.
-            }
-        }
-    }
 
     private record TrustEntry(double score, long untilTick) {
     }

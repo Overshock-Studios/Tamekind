@@ -1,6 +1,7 @@
 package com.tamekind;
 
 import com.tamekind.ai.PassiveGoalInjector;
+import com.tamekind.ai.TamekindAttachments;
 import com.tamekind.ai.PassiveEventDirector;
 import com.tamekind.config.TamekindConfig;
 import com.tamekind.command.TamekindCommand;
@@ -15,6 +16,7 @@ public final class TamekindMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        TamekindAttachments.init();
         TamekindConfig.load(FabricLoader.getInstance().getConfigDir().resolve("tamekind.properties"));
         TamekindCommand.register();
         PassiveEventDirector.register();
