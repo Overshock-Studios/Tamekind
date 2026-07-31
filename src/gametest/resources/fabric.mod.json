@@ -13,6 +13,7 @@
     "fabric-gametest": [
       "com.tamekind.gametest.ApiGameTest",
       "com.tamekind.gametest.HerdGameTest",
+      "com.tamekind.gametest.LodGameTest",
       "com.tamekind.gametest.MemoryGameTest",
       "com.tamekind.gametest.PredatorGameTest"
     ]

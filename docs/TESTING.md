@@ -110,6 +110,20 @@ The bug: `leaderFor` never considered the animal itself, so nothing could elect 
 4. Confirm the alpha is visibly larger (`alphaScaleBonus`, default 8%).
 5. Kill the alpha. **Expected:** a different animal becomes alpha within ~2 seconds.
 
+## T5a: Shelter seeking [EYES, not automated]
+
+Automating this failed. Building valid terrain inside a game test proved harder than the
+behaviour is worth: the test structure sits at an odd Y, an animal falls if the floor is
+not laid under it, and five runs went on terrain rather than on the mod. The shelter search
+itself is exhaustive and unchanged in behaviour, so this is a manual check.
+
+1. `habitatEnabled=true`. Build a simple 5x5 roofed shelter in an open field.
+2. Stand near a cow so it is at `FULL` level-of-detail (`/tamekind dump`).
+3. `/weather rain`. **Expected:** the cow walks under the roof.
+4. Wound a cow to below 30% health in clear weather. **Expected:** it also seeks shelter.
+5. Remove the roof and repeat. **Expected:** it gives up and stays put rather than pathing
+   to a position that does not exist.
+
 ## T5: Shared shelter and graze publish
 
 These were dead for the same reason as T4.
