@@ -94,8 +94,8 @@ Not gaps: worth knowing so they don't get "fixed" into parity:
 - **Elected alpha with a shared blackboard.** A deterministic lowest-UUID adult per
   herd publishes shelter, graze and water positions its followers reuse. No mod in
   either group has a leader concept at all.
-- **Trust and danger memory per player**, persisted through `Animal`'s save data,
-  with linear decay, hit-forgiveness and herd trust sharing.
+- **Trust and danger memory per player**, persisted through a Fabric attachment, with
+  linear decay, hit-forgiveness and herd trust sharing.
 - **A real datapack surface.** 7 entity tags, 7 block tags, a per-species biome tag,
   and `predators_of/<prey>`: modpacks reshape the food-web without touching code.
 - **AI level-of-detail** (FULL/SIMPLE/SLEEP/HIBERNATE) with a per-entity cache, so

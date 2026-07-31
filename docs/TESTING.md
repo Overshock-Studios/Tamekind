@@ -1,7 +1,20 @@
 # Tamekind in-game test plan
 
-Everything in 0.2.0 was verified by compilation and unit tests only. **Nothing has been
-run in a live world.** This is the checklist that closes that gap.
+Two layers cover 0.2.0. **Run the automated one first:**
+
+```
+gradlew test           # 61 unit tests, no world
+gradlew runGametest    # 15 in-world tests on a headless server
+```
+
+`runGametest` boots a real server, spawns real animals and asserts on real state, so it
+already covers goal attachment, alpha consensus, sentinel rotation, isolation, the tamed
+predator guard, attachment round-tripping, danger expiry and the scale pipeline. It is not
+part of `check`, because it boots Minecraft.
+
+What follows is the manual layer: the things a headless server cannot judge, chiefly
+whether the behaviour *reads* correctly to a person watching it. Anything below that the
+game tests already assert is marked `[AUTO]`.
 
 Work top to bottom: T1 and T2 are load-bearing. If a mixin fails to bind, the server
 crashes on start and every later test is meaningless.
@@ -28,7 +41,7 @@ Useful throughout:
 
 ---
 
-## T1: Mixins bind (blocker)
+## T1: Mixins bind (blocker) `[AUTO]`
 
 `tamekind.mixins.json` sets `injectors.defaultRequire: 1`, so a moved target is a hard
 crash at load, not a silent no-op. Three of the six mixins are new or rewritten in 0.2.0.
@@ -85,7 +98,7 @@ The behaviour that the priority-4 move was meant to repair.
 6. **Expected:** followers walk roughly the alpha's route, not a straight line at it. On
    broken terrain the herd should form a line rather than a clump.
 
-## T4: Alpha election is unanimous (0.2.0 fix)
+## T4: Alpha election is unanimous (0.2.0 fix) `[AUTO]`
 
 The bug: `leaderFor` never considered the animal itself, so nothing could elect itself.
 
@@ -117,7 +130,7 @@ These were dead for the same reason as T4.
 5. Walk a wolf into range. **Expected:** the whole herd reacts noticeably sooner than a
    lone animal would, because the lookout broadcasts.
 
-## T7: Predator food-web, and pets do NOT hunt (0.2.0 fix)
+## T7: Predator food-web, and pets do NOT hunt (0.2.0 fix) `[AUTO]`
 
 The hunt goal never attached in a released jar before; repairing it exposed a
 farm-breaking case.
