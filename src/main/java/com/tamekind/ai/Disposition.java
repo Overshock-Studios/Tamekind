@@ -7,7 +7,7 @@ import net.minecraft.world.entity.animal.Animal;
  * One place where the per-animal modifiers compose.
  *
  * <p>Temperament, isolation stress and body condition all pull on the same two
- * numbers — how far an animal notices things, and how fast it moves. Multiplying them
+ * numbers: how far an animal notices things, and how fast it moves. Multiplying them
  * at each call site invited drift (one goal applying two of the three, another
  * applying a different two), so every caller goes through here instead.
  */
@@ -28,7 +28,7 @@ public final class Disposition {
 
     /**
      * Movement-speed multiplier from body condition. Returns 1.0 when the condition
-     * system is off, and never returns 0 — a neglected animal is slow, never stuck.
+     * system is off, and never returns 0: a neglected animal is slow, never stuck.
      */
     public static double speedMultiplier(Animal animal) {
         if (!TamekindConfig.conditionEnabled) return 1.0;

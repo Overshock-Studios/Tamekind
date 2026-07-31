@@ -1,14 +1,17 @@
 package com.tamekind.ai.goal;
 
 import com.tamekind.ai.AiLod;
-import com.tamekind.ai.ThreatScanner;
+import com.tamekind.ai.AnimalTemperament;
+import com.tamekind.ai.Disposition;
 import com.tamekind.ai.TamekindAnimalRules;
+import com.tamekind.ai.ThreatScanner;
 import com.tamekind.compat.TamekindTags;
 import com.tamekind.config.TamekindConfig;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.animal.Animal;
 
 import java.util.EnumSet;
 
@@ -29,7 +32,7 @@ public final class AlertFreezeGoal extends Goal implements TamekindGoal {
         if (!TamekindConfig.enabled || !TamekindConfig.alertEnabled || AiLod.forAnimal(animal) != AiLod.FULL) return false;
         if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         if (animal.tickCount < nextAllowedTick) return false;
-        double radius = TamekindConfig.alertRadius * com.tamekind.ai.Disposition.alertMultiplier(animal);
+        double radius = TamekindConfig.alertRadius * Disposition.alertMultiplier(animal);
         threat = ThreatScanner.nearestThreat(animal, radius);
         if (threat == null) return false;
         return animal.distanceToSqr(threat) > TamekindConfig.panicRadius * TamekindConfig.panicRadius;
@@ -53,7 +56,7 @@ public final class AlertFreezeGoal extends Goal implements TamekindGoal {
         if (animal.isBaby()) { min = Math.max(5, min / 2); rnd = Math.max(1, rnd / 2); }
         boolean freezer = BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.FREEZERS);
         if (freezer) { min *= 3; rnd *= 2; }
-        double temper = com.tamekind.ai.AnimalTemperament.forAnimal(animal).freezeMultiplier();
+        double temper = AnimalTemperament.forAnimal(animal).freezeMultiplier();
         min = Math.max(5, (int) (min * temper));
         rnd = Math.max(1, (int) (rnd * temper));
         alertTicks = min + animal.getRandom().nextInt(rnd);

@@ -40,7 +40,7 @@ public abstract class AnimalBreedingMixin {
 
     /**
      * A worn-down animal declines to mate. Cancels the vanilla check rather than
-     * consuming the food, so nothing is lost — the player is simply told "not yet" by
+     * consuming the food, so nothing is lost: the player is simply told "not yet" by
      * the animal not entering love mode.
      *
      * <p>Only active when {@code conditionEnabled} is on, which it is not by default.

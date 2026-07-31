@@ -12,7 +12,7 @@ import java.util.Random;
  *
  * <p>A wild-spawned animal rolls its size deterministically from its UUID, so the
  * value needs no storage and survives reloads. A *bred* animal instead inherits the
- * average of its parents plus a small wobble, and that inherited value is persisted —
+ * average of its parents plus a small wobble, and that inherited value is persisted:
  * which is what makes selective breeding compound across generations instead of
  * resetting every birth.
  *

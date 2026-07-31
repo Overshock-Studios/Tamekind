@@ -4,7 +4,7 @@ package com.tamekind.ai;
  * The one place Tamekind's goal priorities are decided, and the reasoning for them.
  *
  * <p>Tamekind injects into the *same* {@code goalSelector} vanilla already populated,
- * so priorities are not free choices — they are claims against a table vanilla owns.
+ * so priorities are not free choices: they are claims against a table vanilla owns.
  * The vanilla animal layout below was read out of the 26.1.2 bytecode, not recalled:
  *
  * <pre>
@@ -33,7 +33,7 @@ package com.tamekind.ai;
  *
  * <p>Vanilla occupies 0-8 contiguously, so a mod adding this many movement goals cannot
  * avoid every tie without displacing vanilla behaviour. Tamekind does not displace
- * vanilla, so some ties are accepted deliberately — but only where the two goals are
+ * vanilla, so some ties are accepted deliberately, but only where the two goals are
  * same-intent or mutually exclusive. Those are marked below. Use
  * {@code /tamekind goals} in game to see the live table, including other mods' goals.
  */

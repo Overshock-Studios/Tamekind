@@ -22,7 +22,7 @@ public final class PassiveEventDirector {
 
     /**
      * Herd-mates that watch one of their own die remember it. Enough deaths inside the
-     * memory window and the survivors stop fleeing — the herd has decided the field is
+     * memory window and the survivors stop fleeing: the herd has decided the field is
      * theirs. They never retaliate with damage; only panic is suppressed.
      */
     private static void afterDeath(LivingEntity entity, DamageSource source) {

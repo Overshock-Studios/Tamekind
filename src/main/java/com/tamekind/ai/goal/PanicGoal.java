@@ -4,15 +4,17 @@ import com.tamekind.ai.AiLod;
 import com.tamekind.ai.AnimalMemory;
 import com.tamekind.ai.AnimalMemoryStore;
 import com.tamekind.ai.DangerBroadcaster;
+import com.tamekind.ai.Disposition;
 import com.tamekind.ai.HerdCoordinator;
-import com.tamekind.ai.ThreatScanner;
 import com.tamekind.ai.TamekindAnimalRules;
+import com.tamekind.ai.ThreatScanner;
 import com.tamekind.compat.TamekindTags;
 import com.tamekind.config.TamekindConfig;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -35,7 +37,7 @@ public final class PanicGoal extends Goal implements TamekindGoal {
         if (TamekindAnimalRules.skipMovementGoals(animal)) return false;
         AnimalMemory memory = AnimalMemoryStore.get(animal);
         memory.tick(animal.level().getGameTime());
-        double panicRadius = TamekindConfig.panicRadius * com.tamekind.ai.Disposition.alertMultiplier(animal);
+        double panicRadius = TamekindConfig.panicRadius * Disposition.alertMultiplier(animal);
         if (animal.isBaby()) panicRadius *= TamekindConfig.babyPanicRadiusMultiplier;
         Entity threat = ThreatScanner.nearestThreat(animal, panicRadius);
         if (threat != null) {
@@ -83,8 +85,8 @@ public final class PanicGoal extends Goal implements TamekindGoal {
         if (danger == null) return;
         long now = animal.level().getGameTime();
         // A herd that has watched too many of its own die stops running. It does not
-        // fight back — it just refuses to give more ground, and faces the threat.
-        if (!animal.isBaby() && com.tamekind.ai.Disposition.standsGround(animal)) {
+        // fight back: it just refuses to give more ground, and faces the threat.
+        if (!animal.isBaby() && Disposition.standsGround(animal)) {
             animal.getNavigation().stop();
             animal.getLookControl().setLookAt(danger.x, danger.y, danger.z);
             return;
@@ -100,7 +102,7 @@ public final class PanicGoal extends Goal implements TamekindGoal {
         }
         BlockPos escape = chooseEscapePos();
         if (escape == null) return;
-        double speed = TamekindConfig.panicSpeed * com.tamekind.ai.Disposition.speedMultiplier(animal);
+        double speed = TamekindConfig.panicSpeed * Disposition.speedMultiplier(animal);
         if (animal.isBaby()) speed *= TamekindConfig.babyPanicSpeedMultiplier;
         if (animal.getHealth() < animal.getMaxHealth() * TamekindConfig.lowHpThresholdFraction) {
             speed *= TamekindConfig.limpSpeedMultiplier;

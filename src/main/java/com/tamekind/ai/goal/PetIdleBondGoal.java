@@ -1,12 +1,14 @@
 package com.tamekind.ai.goal;
 
 import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.ai.AnimalTemperament;
 import com.tamekind.config.TamekindConfig;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.EnumSet;
@@ -49,7 +51,7 @@ public final class PetIdleBondGoal extends Goal implements TamekindGoal {
         if (chosen != null && AnimalMemoryStore.get(animal).dangerPos(level.getGameTime()) == null) {
             long until = level.getGameTime() + TamekindConfig.trustTicks;
             double gain = TamekindConfig.idleBondTrustGain
-                    * com.tamekind.ai.AnimalTemperament.forAnimal(animal).trustGainMultiplier();
+                    * AnimalTemperament.forAnimal(animal).trustGainMultiplier();
             AnimalMemoryStore.get(animal).addTrust(chosen.getUUID(), gain, until);
         }
         return false;

@@ -2,11 +2,14 @@ package com.tamekind.ai.goal;
 
 import com.tamekind.ai.AiLod;
 import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.ai.Disposition;
 import com.tamekind.ai.HerdCoordinator;
 import com.tamekind.ai.TamekindAnimalRules;
 import com.tamekind.config.TamekindConfig;
-import net.minecraft.world.entity.animal.Animal;
+
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.animal.Animal;
 
 import java.util.EnumSet;
 
@@ -56,11 +59,11 @@ public final class HerdFollowGoal extends Goal implements TamekindGoal {
      * itself through terrain the leader already picked a way around. Following the
      * oldest still-nearby trail point instead puts the herd in a line along a route
      * that is known to be walkable. Falls back to the leader directly when no usable
-     * trail point exists — a leader that has not moved has nothing to follow.
+     * trail point exists: a leader that has not moved has nothing to follow.
      */
     private void follow() {
-        double speed = TamekindConfig.herdFollowSpeed * com.tamekind.ai.Disposition.speedMultiplier(animal);
-        net.minecraft.core.BlockPos point = AnimalMemoryStore.get(leader)
+        double speed = TamekindConfig.herdFollowSpeed * Disposition.speedMultiplier(animal);
+        BlockPos point = AnimalMemoryStore.get(leader)
                 .trailPointFor(animal.blockPosition(), TamekindConfig.herdSearchRadius
                         * (double) TamekindConfig.herdSearchRadius);
         if (point != null) {

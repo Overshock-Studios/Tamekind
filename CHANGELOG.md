@@ -10,14 +10,14 @@ Targets 26.1.2. 26.2 is not source-compatible; see `docs/PORTING-26.2.md`.
   features at once. `HerdCoordinator.leaderFor` scored only an animal's *neighbours*,
   never the animal itself, so `leader == animal` could not be true anywhere. That one
   omission meant the alpha size bonus never applied, and leaders never published a
-  shared shelter, graze or water position — so "leader-driven shelter and graze scans"
+  shared shelter, graze or water position, so "leader-driven shelter and graze scans"
   and "follower piggybacking" did nothing. It also made the election disagree with
   itself: in a herd of three, A named B as leader while B named A, so pairs of animals
   followed each other in circles instead of forming one group. The candidate pool now
   includes the animal itself, which makes the election unanimous across the herd.
 - Fixed wolves and foxes never hunting tagged prey in a released jar. Both hunt mixins
   reflected on the field name `"targetSelector"`, but string literals are not remapped,
-  so the lookup resolved in a dev run and threw `NoSuchFieldException` in production —
+  so the lookup resolved in a dev run and threw `NoSuchFieldException` in production:
   where it was swallowed by `catch (Throwable ignored)`. The two-way predator food-web
   was therefore dev-only. Both now use a `tamekind$targetSelector()` accessor mixin,
   matching the pattern Warband already uses, and no longer swallow failures.
@@ -31,11 +31,11 @@ Targets 26.1.2. 26.2 is not source-compatible; see `docs/PORTING-26.2.md`.
   animal. Feeding a wolf is a heal, not a courtship, but crowd control saw only "food
   was used" and could refuse it once eight of the same type were nearby. It now applies
   only to a feed that would actually start breeding.
-- Fixed `config/tamekind.properties` regenerating without the new keys on upgrade —
+- Fixed `config/tamekind.properties` regenerating without the new keys on upgrade:
   every new setting is written into the commented template.
 - Fixed tamed predators hunting their owner's livestock. `predators_of/minecraft/sheep`
   lists wolf, and the hunt goal is added to *every* wolf, so a pet wolf would work
-  through its owner's own flock. This was latent — the reflection bug above meant the
+  through its owner's own flock. This was latent: the reflection bug above meant the
   goal never actually attached in a released jar, so repairing that mixin is what would
   have exposed it. `TagHunting` now refuses to let a tamed predator hunt on its own,
   matching vanilla, where taming a wolf stops it hunting sheep.
@@ -45,7 +45,7 @@ Targets 26.1.2. 26.2 is not source-compatible; see `docs/PORTING-26.2.md`.
 
 ### Added
 
-- **Temperament.** Every animal has a personality — skittish, steady, bold or curious —
+- **Temperament.** Every animal has a personality (skittish, steady, bold or curious)
   derived from its UUID, so it costs no save data and never changes across reloads. It
   scales alert radius, how long the animal freezes when startled, and how quickly it
   learns to trust you. Two cows in the same field now behave measurably differently.
@@ -71,8 +71,8 @@ Targets 26.1.2. 26.2 is not source-compatible; see `docs/PORTING-26.2.md`.
 - **Isolation stress.** A herd animal with no herd-mates in range is jumpier and settles
   down to graze less readily. `isolationStressEnabled`, `isolationAlertMultiplier`.
 - **Territorial retaliation.** Adults that watch enough herd-mates die nearby stop
-  fleeing and hold their ground facing the threat. They never fight back — only panic is
-  suppressed — so passive mobs stay passive. The count decays, so a herd farmed slowly
+  fleeing and hold their ground facing the threat. They never fight back: only panic is
+  suppressed, so passive mobs stay passive. The count decays, so a herd farmed slowly
   over hours never turns defiant. `territorialRetaliationEnabled`, `cullMemoryTicks`,
   `cullVengeanceThreshold`, `cullVengeanceTicks`, `cullWitnessRadius`.
 - **Trail-following.** Herd followers now walk the alpha's recorded route rather than
@@ -86,7 +86,7 @@ Targets 26.1.2. 26.2 is not source-compatible; see `docs/PORTING-26.2.md`.
 - **Body condition, opt-in and non-lethal** (`conditionEnabled`, **off by default**). A
   0..1 stat that drains only where the animal is actually simulated and is restored by a
   graze or drink it actually reached. Low condition slows an animal and makes it decline
-  to mate. It is floored and **never deals damage** — livestock cannot starve while you
+  to mate. It is floored and **never deals damage**: livestock cannot starve while you
   are away, which is the failure mode that sinks every hunger system in this genre.
   Tuned with `conditionDecayIntervalTicks`, `conditionDecayPerInterval`,
   `conditionFloor`, `conditionGrazeRestore`, `conditionDrinkRestore`,
@@ -94,12 +94,12 @@ Targets 26.1.2. 26.2 is not source-compatible; see `docs/PORTING-26.2.md`.
 - `/tamekind animal`, `dump` and `leader` now report `isAlpha` and `temperament`;
   `dump` additionally reports the current sentinel, isolation, inherited scale, trail
   length, witnessed culls, stand-ground state and condition.
-- `docs/FEATURE-GAP.md` — competitive analysis against the herd-behaviour mods and the
+- `docs/FEATURE-GAP.md`: competitive analysis against the herd-behaviour mods and the
   livestock sims, with explicit declines and reasons.
-- `docs/PORTING-26.2.md` — the 26.2 migration, verified by cross-compiling.
-- `CLAUDE.md` — graphify wiring plus the project's non-negotiables.
+- `docs/PORTING-26.2.md`: the 26.2 migration, verified by cross-compiling.
+- `CLAUDE.md`: graphify wiring plus the project's non-negotiables.
 - Unit tests for temperament, heritable-size descent (including a 200-generation drift
-  check) and the new memory state — retaliation decay, condition flooring, trail bounds
+  check) and the new memory state: retaliation decay, condition flooring, trail bounds
   (43 tests total).
 
 ### Changed
@@ -114,7 +114,7 @@ Targets 26.1.2. 26.2 is not source-compatible; see `docs/PORTING-26.2.md`.
 
 ### Removed
 
-- Deleted `data/tamekind/tags/blocks/` and `data/tamekind/tags/entity_types/` — 13
+- Deleted `data/tamekind/tags/blocks/` and `data/tamekind/tags/entity_types/`: 13
   files. Datapack tag directories have been singular (`block`, `entity_type`) since
   1.21, confirmed absent from the 26.1.2 vanilla jar, so these plural copies were dead
   weight that could never load and would drift out of sync with the real ones.

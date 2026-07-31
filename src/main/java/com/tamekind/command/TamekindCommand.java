@@ -3,10 +3,15 @@ package com.tamekind.command;
 import com.tamekind.ai.AiLod;
 import com.tamekind.ai.AnimalMemory;
 import com.tamekind.ai.AnimalMemoryStore;
+import com.tamekind.ai.AnimalTemperament;
+import com.tamekind.ai.Disposition;
+import com.tamekind.ai.GoalDiagnostics;
 import com.tamekind.ai.HerdCoordinator;
+import com.tamekind.ai.PassiveGoalInjector;
 import com.tamekind.ai.goal.TamekindGoal;
 import com.tamekind.config.TamekindConfig;
 import com.tamekind.mixin.MobGoalSelectorAccessor;
+
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -122,7 +127,7 @@ public final class TamekindCommand {
                 formatAnimal(leader),
                 formatAnimal(adult),
                 leader == animal,
-                com.tamekind.ai.AnimalTemperament.forAnimal(animal).lowerName())), false);
+                AnimalTemperament.forAnimal(animal).lowerName())), false);
         BlockPos home = memory.home();
         boolean guarding = memory.isGuarding(now);
         source.sendSuccess(() -> Component.literal(String.format(
@@ -240,12 +245,12 @@ public final class TamekindCommand {
         sb.append("\n  sentinel=").append(formatAnimal(HerdCoordinator.sentinelFor(animal)));
         sb.append(" onWatch=").append(HerdCoordinator.sentinelFor(animal) == animal);
         sb.append(" isolated=").append(HerdCoordinator.isIsolated(animal));
-        sb.append("\n  temperament=").append(com.tamekind.ai.AnimalTemperament.forAnimal(animal).lowerName());
+        sb.append("\n  temperament=").append(AnimalTemperament.forAnimal(animal).lowerName());
         sb.append(" inheritedScale=").append(Double.isNaN(m.inheritedScale()) ? "wild"
                 : String.format("%.3f", m.inheritedScale()));
         sb.append(" trailPoints=").append(m.trailSize());
         sb.append("\n  cullsWitnessed=").append(m.cullCount(now));
-        sb.append(" standsGround=").append(com.tamekind.ai.Disposition.standsGround(animal));
+        sb.append(" standsGround=").append(Disposition.standsGround(animal));
         sb.append("\n  condition=").append(TamekindConfig.conditionEnabled
                 ? String.format("%.2f", m.condition()) : "disabled");
         source.sendSuccess(() -> Component.literal("[Tamekind] " + sb), false);
@@ -257,7 +262,7 @@ public final class TamekindCommand {
      * state, then flags every same-priority flag collision.
      *
      * <p>This reads the real selector, so it includes vanilla's goals and any other
-     * mod's — contention that no compile-time check can see. When a Tamekind behaviour
+     * mod's: contention that no compile-time check can see. When a Tamekind behaviour
      * "never happens", this is the first thing to look at: the cause is usually a goal
      * at a strictly lower priority holding MOVE, not the behaviour's own conditions.
      */
@@ -276,7 +281,7 @@ public final class TamekindCommand {
         source.sendSuccess(() -> Component.literal(String.format(
                 "[Tamekind] goal table for %s#%d  (prio | owner | goal | flags | running)",
                 animal.getType().toShortString(), animal.getId())), false);
-        for (com.tamekind.ai.GoalDiagnostics.Entry e : com.tamekind.ai.GoalDiagnostics.inspect(animal)) {
+        for (GoalDiagnostics.Entry e : GoalDiagnostics.inspect(animal)) {
             source.sendSuccess(() -> Component.literal(String.format(
                     "  %3d %-9s %-28s %-14s %s",
                     e.priority(),
@@ -286,7 +291,7 @@ public final class TamekindCommand {
                     e.running() ? "RUNNING" : "")), false);
         }
 
-        var conflicts = com.tamekind.ai.GoalDiagnostics.conflicts(animal);
+        var conflicts = GoalDiagnostics.conflicts(animal);
         if (conflicts.isEmpty()) {
             source.sendSuccess(() -> Component.literal("  no same-priority flag collisions"), false);
             return 1;
@@ -294,7 +299,7 @@ public final class TamekindCommand {
         source.sendSuccess(() -> Component.literal(String.format(
                 "  %d same-priority flag collision(s) - the selector cannot break these ties:",
                 conflicts.size())), false);
-        for (com.tamekind.ai.GoalDiagnostics.Conflict c : conflicts) {
+        for (GoalDiagnostics.Conflict c : conflicts) {
             source.sendSuccess(() -> Component.literal(String.format(
                     "  COLLISION prio %d: %s vs %s share %s",
                     c.priority(), c.first(), c.second(), c.sharedFlags())), false);
@@ -405,7 +410,7 @@ public final class TamekindCommand {
             TamekindConfig.load(net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("tamekind.properties"));
             // Let the goal table be logged again, so toggling debugLogs on and reloading
             // is enough to see it without restarting the server.
-            com.tamekind.ai.PassiveGoalInjector.resetGoalTableLog();
+            PassiveGoalInjector.resetGoalTableLog();
             source.sendSuccess(() -> Component.literal("[Tamekind] Config reloaded."), true);
             return 1;
         } catch (Exception e) {

@@ -17,7 +17,7 @@ import java.util.TreeMap;
  * Reports what is actually in an animal's goal selector at runtime.
  *
  * <p>The static table in {@link GoalPriorities} records what Tamekind *intends*. This
- * reads what is really there — including vanilla's goals and any other mod's — and
+ * reads what is really there, including vanilla's goals and any other mod's, and
  * finds contention that no compile-time check can see, because flags and priorities of
  * third-party goals are only knowable in a live world.
  *

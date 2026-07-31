@@ -23,11 +23,11 @@ compiles clean. The count is high because tag providers name constants in bulk.
 
 Re-verified after the 0.2.0 feature pass: the count moved 100 → 102, and both new
 errors are one added `EntityType.WOLF` reference in the entity tag provider. No new
-error *category* appeared — every new AI class (`Disposition`, `SizeVariance`,
+error *category* appeared: every new AI class (`Disposition`, `SizeVariance`,
 `AnimalTemperament`, `SentinelWatchGoal`, `HerdTrailGoal`, `ConditionGoal`,
 `AnimalBreedingMixin`) compiles against 26.2 unchanged.
 
-## 1. `EntityType.*` constants moved to a new `EntityTypes` class — 68 errors
+## 1. `EntityType.*` constants moved to a new `EntityTypes` class: 68 errors
 
 ```java
 net.minecraft.world.entity.EntityType.PIG    // 26.1.2
@@ -35,7 +35,7 @@ net.minecraft.world.entity.EntityTypes.PIG   // 26.2
 ```
 
 `EntityType` still exists in 26.2 (it remains the generic type you hold), but it
-retains only 3 static fields — every registry constant moved to the new sibling class
+retains only 3 static fields: every registry constant moved to the new sibling class
 `net.minecraft.world.entity.EntityTypes`.
 
 **`EntityTypes` does not exist in 26.1.2**, so unlike Warband's `getCenter()` item
@@ -50,7 +50,7 @@ Affected files: `TamekindEntityTagProvider` (68), `WallowGoal` (2).
 This is a pure find-and-replace of `EntityType.` → `EntityTypes.` at those sites, plus
 one import. Note `WallowGoal` is the only *runtime* file in the whole port.
 
-## 2. Wool constants folded into a `ColorCollection` — 32 errors
+## 2. Wool constants folded into a `ColorCollection`: 32 errors
 
 ```java
 Blocks.WHITE_WOOL                        // 26.1.2
@@ -58,7 +58,7 @@ Blocks.WOOL.pick(DyeColor.WHITE)         // 26.2
 Blocks.WOOL.white()                      // 26.2, record accessor
 ```
 
-`Blocks.WOOL` in 26.2 is a `ColorCollection<Block>` — a 16-field record keyed by
+`Blocks.WOOL` in 26.2 is a `ColorCollection<Block>`: a 16-field record keyed by
 `DyeColor`. The per-colour `*_WOOL` fields are gone from `Blocks` entirely.
 
 All 32 errors are the 16 wool blocks listed twice (error + note) in
@@ -83,26 +83,26 @@ record accessor per colour (`white()`, `orange()`, …).
 
 Also worth knowing: the shipped `data/tamekind/tags/block/comfort_blocks.json` already
 lists the wool colours literally and is version-neutral. The datagen providers are a
-parallel source of truth for the same tags — see the warning below.
+parallel source of truth for the same tags: see the warning below.
 
 ## 3. What did NOT break
 
 Recorded because it is the useful half of a cross-compile:
 
-- **`Vec3.atCenterOf`** — already migrated off `BlockPos.getCenter()` on the 26.1.2
+- **`Vec3.atCenterOf`**: already migrated off `BlockPos.getCenter()` on the 26.1.2
   tree, which is why zero errors appear for it here. Warband's doc flagged this as
   the version-neutral prep item; Tamekind has done it.
 - **Animal class foldering.** 26.2 continues moving entities into per-species packages
   (`animal.cow.Cow`, `animal.pig.Pig`, `animal.polarbear.PolarBear`,
   `animal.sheep.Sheep`, `monster.zombie.Zombie`). Tamekind only ever imports
   `Animal`, `animal.wolf.Wolf`, `animal.fox.Fox` and `animal.chicken.Chicken`, all of
-  which were already foldered in 26.1 — **so there is no import churn at all.** This
+  which were already foldered in 26.1, **so there is no import churn at all.** This
   is the main reason this port is lighter than Warband's, which imports `Slime` and
   `MagmaCube` directly.
 - **Save data.** `ValueInput` / `ValueOutput` and the `addAdditionalSaveData` /
   `readAdditionalSaveData` signatures on `Animal` are unchanged, so
   `AnimalMemoryMixin` and `AnimalMemory.save/load` need no work.
-- **Attributes, goals, tags, commands, `Identifier`, `isFaceSturdy`** — all clean.
+- **Attributes, goals, tags, commands, `Identifier`, `isFaceSturdy`**: all clean.
 
 ## Recommended order
 
@@ -122,14 +122,14 @@ Recorded because it is the useful half of a cross-compile:
 6. Confirm in-game that the two hunt mixins actually fire. They previously used
    reflection on a mapped field name, which worked in dev and failed silently in a
    released jar; they now use `MobGoalSelectorAccessor.tamekind$targetSelector()`.
-   Keep it that way — never reintroduce `getDeclaredField` on a Minecraft member.
+   Keep it that way: never reintroduce `getDeclaredField` on a Minecraft member.
 
 ## Standing warning: datagen vs shipped resources
 
 `build.gradle` registers `src/main/generated` as a resource source dir, and the
 datagen providers write the *same* tag paths that are already committed by hand under
 `src/main/resources/data/tamekind/tags/`. `src/main/generated` is currently absent, so
-nothing collides — but running the `datagen` task would produce two resource roots
+nothing collides, but running the `datagen` task would produce two resource roots
 claiming the same files. Decide one owner before the port; the hand-written resources
 are what actually ships today.
 

@@ -8,7 +8,7 @@ against the current source, not recalled.
 
 The comparison set is not one competitor but two disjoint groups.
 
-**Group A — behaviour mods.** Same goal as Tamekind: make vanilla animals act alive.
+**Group A: behaviour mods.** Same goal as Tamekind: make vanilla animals act alive.
 
 | | Herd Hysteria | HerdsPanic | Animals herding | Big Brain | Advanced Animals | Tamekind |
 |---|---|---|---|---|---|---|
@@ -23,7 +23,7 @@ The comparison set is not one competitor but two disjoint groups.
 | Datapack-driven | no | no | no | no | no | **yes** |
 | AI level-of-detail | no | no | no | no | no | **yes** |
 
-**Group B — livestock sims.** Adjacent, much heavier, and content-shaped: they add
+**Group B: livestock sims.** Adjacent, much heavier, and content-shaped: they add
 items, GUIs, genetics and replacement entities.
 
 | | Genetic Animals | Animal Husbandry | Animal Wellness |
@@ -36,7 +36,7 @@ items, GUIs, genetics and replacement entities.
 Two conclusions, and they point opposite ways.
 
 Against Group A, **Tamekind is already ahead on every axis** and is the only mod of
-its kind on Fabric 26.x. Herd Hysteria — the closest active competitor — is one
+its kind on Fabric 26.x. Herd Hysteria, the closest active competitor, is one
 mechanic (hurt one, all flee) with 484 downloads. There is nothing to take.
 
 Against Group B there is plenty to take, but almost all of it violates the mod's
@@ -46,7 +46,7 @@ through AI alone. That is what the three additions below do.
 
 ## Where Tamekind already leads
 
-Not gaps — worth knowing so they don't get "fixed" into parity:
+Not gaps: worth knowing so they don't get "fixed" into parity:
 
 - **Elected alpha with a shared blackboard.** A deterministic lowest-UUID adult per
   herd publishes shelter, graze and water positions its followers reuse. No mod in
@@ -54,7 +54,7 @@ Not gaps — worth knowing so they don't get "fixed" into parity:
 - **Trust and danger memory per player**, persisted through `Animal`'s save data,
   with linear decay, hit-forgiveness and herd trust sharing.
 - **A real datapack surface.** 7 entity tags, 7 block tags, a per-species biome tag,
-  and `predators_of/<prey>` — modpacks reshape the food-web without touching code.
+  and `predators_of/<prey>`: modpacks reshape the food-web without touching code.
 - **AI level-of-detail** (FULL/SIMPLE/SLEEP/HIBERNATE) with a per-entity cache, so
   dense farms stay cheap. Every Group A mod runs full AI on every animal forever.
 - **Two-way predator tags.** Prey flees the predator *and* wolves and foxes hunt it.
@@ -66,16 +66,16 @@ Not gaps — worth knowing so they don't get "fixed" into parity:
 
 | Group B feature | Tamekind status | Verdict |
 |---|---|---|
-| Per-animal personality traits (glutton, grumpy, energetic) | **Was absent.** Now `AnimalTemperament` — skittish/steady/bold/curious, UUID-derived | **Taken** |
+| Per-animal personality traits (glutton, grumpy, energetic) | **Was absent.** Now `AnimalTemperament`: skittish/steady/bold/curious, UUID-derived | **Taken** |
 | Herd lookout / sentinel while others feed | **Was absent** everywhere in the niche | **Taken** (from wildlife sims, not from a mod) |
 | Calm-approach bonding | **Was absent.** Now `crouchFeedTrustMultiplier` | **Taken** |
-| Hunger / thirst as a survival stat with damage | Now `conditionEnabled` — opt-in and **non-lethal**; the damaging version stays declined | **Taken, defanged** |
-| Sickness and medicine | Absent | **Decline** — needs items |
-| Grooming / happiness meters | Absent | **Decline** — needs items and a GUI |
-| Inherited genetics (colour, size, yield) | Now `heritableSizeEnabled` — a calf is its parents' midpoint. Size only | **Taken** |
+| Hunger / thirst as a survival stat with damage | Now `conditionEnabled`: opt-in and **non-lethal**; the damaging version stays declined | **Taken, defanged** |
+| Sickness and medicine | Absent | **Decline**: needs items |
+| Grooming / happiness meters | Absent | **Decline**: needs items and a GUI |
+| Inherited genetics (colour, size, yield) | Now `heritableSizeEnabled`: a calf is its parents' midpoint. Size only | **Taken** |
 | Gendered animals, pregnancy, egg fertility | Absent | **Decline** |
-| Isolation stress (a lone penned animal) | Now `isolationStressEnabled` — jumpier, slower to settle | **Taken** |
-| Territorial retaliation after repeated culling | Now `territorialRetaliationEnabled` — survivors stop fleeing | **Taken** |
+| Isolation stress (a lone penned animal) | Now `isolationStressEnabled`: jumpier, slower to settle | **Taken** |
+| Territorial retaliation after repeated culling | Now `territorialRetaliationEnabled`: survivors stop fleeing | **Taken** |
 | Predator-vs-predator turf conflict | Now shipped as a tag entry; the system already supported it | **Taken** |
 | Replacement entity models per breed | Absent | **Decline** |
 
@@ -89,21 +89,21 @@ a block, an entity or a packet.
    Scales alert radius, freeze length and trust gain. This is Animal Husbandry's
    personality traits and Genetic Animals' per-animal variation, delivered as pure
    AI. Seeded from the *high* UUID bits because size variance already uses the low
-   bits — sharing a seed would make every skittish cow the same size.
+   bits: sharing a seed would make every skittish cow the same size.
 
 2. **Sentinel watch** (`SentinelWatchGoal`, `sentinelEnabled`). While the herd
    grazes, the alpha holds position, sweeps its head, scans at
    `sentinelAlertRadiusMultiplier × alertRadius`, and broadcasts danger the moment it
    sees something. Lifted from open-world wildlife sims, where a lookout is standard
-   and where the readable silhouette — one animal with its head up — is the whole
+   and where the readable silhouette, one animal with its head up, is the whole
    tell. **No mod in either group models this.** It is the clearest differentiator
    available, and it only became possible once the alpha election actually worked.
 
 3. **Approach etiquette** (`crouchFeedTrustMultiplier`). Feeding while crouched
    bonds faster. Chosen over a bespoke taming minigame because it reuses the trust
    system and because it mirrors Warband's central perception rule: crouching
-   *subtracts* threat. The two mods now share one legible body-language grammar —
-   crouch to be less alarming, sprint to be more — across passive and hostile AI.
+   *subtracts* threat. The two mods now share one legible body-language grammar:
+   crouch to be less alarming, sprint to be more, across passive and hostile AI.
 
 4. **Sentinel rotation** (`sentinelRotationEnabled`). The watch rotates through the
    herd's adults on a shift timer derived from game time, so the alpha eventually gets
@@ -113,20 +113,20 @@ a block, an entity or a packet.
 
 5. **Heritable size** (`heritableSizeEnabled`). A bred calf's base scale is the
    midpoint of its parents plus a small jitter, persisted so it compounds instead of
-   resetting each birth — selective breeding for size finally pays off. Clamped to the
+   resetting each birth: selective breeding for size finally pays off. Clamped to the
    same envelope as a wild roll, because 200 generations of unclamped jitter produces
    unusable animals (there is a test for exactly that). Wild spawns still roll from
    their UUID, so only descent is ever stored.
 
 6. **Isolation stress** (`isolationStressEnabled`). A herd animal with no herd-mates in
    range is jumpier (`isolationAlertMultiplier`) and settles down to graze less readily.
-   The roadmap also promised "breeds slower"; that half was **dropped as vacuous** —
+   The roadmap also promised "breeds slower"; that half was **dropped as vacuous**:
    breeding needs a partner inside the very radius that defines isolation, so an
    isolated animal cannot breed regardless.
 
 7. **Territorial retaliation** (`territorialRetaliationEnabled`). Adults that witness
    enough herd-mates killed nearby inside `cullMemoryTicks` stop fleeing and hold
-   ground facing the threat. They **never fight back** — only panic is suppressed —
+   ground facing the threat. They **never fight back**, only panic is suppressed,
    which keeps passive mobs passive while still making a culled herd feel like it
    noticed. The count resets when the window lapses, so a herd farmed slowly over hours
    never turns defiant. Thematically this is Warband's grudge system reflected onto
@@ -134,21 +134,21 @@ a block, an entity or a packet.
 
 8. **Predator turf conflict.** This needed no new system: `predators_of/<prey>` already
    drives both flight (`ThreatScanner`) and hunting (`TagHunting`), and foxes are
-   `Animal`s — so a single tag entry, wolf in `predators_of/minecraft/fox`, makes wolves
+   `Animal`s, so a single tag entry, wolf in `predators_of/minecraft/fox`, makes wolves
    contest foxes in both directions at once. Shipped as data, fully overridable.
 
 9. **Body condition** (`conditionEnabled`, **off by default**). A 0..1 stat that drains
    only at FULL level-of-detail and is restored by a graze or drink the animal actually
    reached. Low condition slows movement and makes an animal decline to mate. Floored at
    `conditionFloor` and it never deals damage, so livestock cannot starve while a player
-   is away. The damaging version stays declined — see below.
+   is away. The damaging version stays declined: see below.
 
 ## Explicit declines, with reasons
 
 - **Items, blocks, GUIs, structures.** Brushes, medicine and wellness buildings are
   what make Group B a different genre. Tamekind is server-side with no client
   entrypoint; adding content would forfeit "drop it on a server, add it to an
-  existing world" — the property that makes it adoptable at all.
+  existing world": the property that makes it adoptable at all.
 - **Replacing vanilla entities.** Genetic Animals swaps cows for its own entity.
   That breaks every other mod's cow, every datapack loot table and every farm. It is
   the single largest source of complaints about that mod and directly contradicts the
@@ -159,13 +159,13 @@ a block, an entity or a packet.
   "breeding should not be infinite" with a fraction of the blast radius.
 - **Hunger and thirst as *damaging* stats.** Converting condition into a meter that
   kills livestock while a player is away is the animal equivalent of "I logged off and
-  my base had holes in it" — the objection Warband's siege-mining guardrail exists to
+  my base had holes in it": the objection Warband's siege-mining guardrail exists to
   answer. The shipped `conditionEnabled` system is the honest version of this: opt-in,
   floored, non-lethal, and only draining where the animal is actually simulated. The
   lethal variant stays out permanently, not just for now.
 
-10. **Trail-following.** Followers walk the alpha's recorded route — the oldest
-    still-nearby point of an 8-deep trail — instead of making a beeline for it, so a herd
+10. **Trail-following.** Followers walk the alpha's recorded route (the oldest
+    still-nearby point of an 8-deep trail) instead of making a beeline for it, so a herd
     moves in a line along ground already known to be walkable rather than converging into
     a clump and shoving itself through terrain the leader went around. The trail is
     deliberately **transient**: persisting it would path followers at coordinates the
@@ -179,7 +179,7 @@ Everything previously listed here has shipped. Remaining ideas, in rough order o
   like any wild spawn. Blending the parents' dispositions the way size now blends would
   make a calm line of animals a real breeding goal.
 - **Condition-linked produce timing.** A well-conditioned animal reaching its wool or
-  egg timer slightly sooner. Deliberately *timing only* — touching drop tables would
+  egg timer slightly sooner. Deliberately *timing only*: touching drop tables would
   break the farm-respect guarantee.
 - **Sentinel posture cues.** A head-up idle animation or particle so a lookout reads at
   a distance without needing `/tamekind dump`. Needs care: Tamekind is server-side, so
@@ -190,13 +190,13 @@ Everything previously listed here has shipped. Remaining ideas, in rough order o
 
 ## Sources
 
-- [Herd Hysteria](https://modrinth.com/mod/herd-hysteria) — Fabric, max 1.21.11, 484 downloads
-- [HerdsPanic](https://modrinth.com/mod/herdspanic) — Fabric, max 1.21.1
+- [Herd Hysteria](https://modrinth.com/mod/herd-hysteria): Fabric, max 1.21.11, 484 downloads
+- [HerdsPanic](https://modrinth.com/mod/herdspanic): Fabric, max 1.21.1
 - [Animals herding](https://modrinth.com/mod/animals-herding)
-- [Big Brain](https://modrinth.com/mod/big-brain) — shelter + herd alert
+- [Big Brain](https://modrinth.com/mod/big-brain): shelter + herd alert
 - [Advanced Animals](https://modrinth.com/mod/advanced-animals)
-- [Genetic Animals](https://www.curseforge.com/minecraft/mc-mods/genetic-animals) — Forge only, no Fabric planned
-- [Animal Husbandry](https://www.curseforge.com/minecraft/mc-mods/animal-husbandry) — traits, sickness, grooming
+- [Genetic Animals](https://www.curseforge.com/minecraft/mc-mods/genetic-animals): Forge only, no Fabric planned
+- [Animal Husbandry](https://www.curseforge.com/minecraft/mc-mods/animal-husbandry): traits, sickness, grooming
 - [Animal Wellness](https://www.curseforge.com/minecraft/mc-mods/animal-wellness)
 - Tamekind source, verified by direct search for `leaderFor`, `getDeclaredField`,
   `setShiftKeyDown`, `getCenter`, and the `tags/blocks` vs `tags/block` directory split

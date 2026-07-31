@@ -31,7 +31,7 @@ public final class TagHunting {
         if (prey instanceof net.minecraft.world.entity.TamableAnimal tame
                 && (tame.isTame() || tame.isOrderedToSit())) return false;
         // A tamed predator never hunts on its own. Vanilla wolves stop hunting sheep the
-        // moment they are tamed, and `predators_of/minecraft/sheep` lists wolf — without
+        // moment they are tamed, and `predators_of/minecraft/sheep` lists wolf: without
         // this guard a player's pet wolf would work through the player's own flock,
         // which breaks the farm-respect guarantee this mod is built on.
         if (predator instanceof net.minecraft.world.entity.TamableAnimal tamePredator

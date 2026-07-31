@@ -1,36 +1,39 @@
 package com.tamekind.ai;
 
+import com.tamekind.TamekindMod;
+import com.tamekind.ai.goal.AgeScaleGoal;
 import com.tamekind.ai.goal.AlertFreezeGoal;
+import com.tamekind.ai.goal.AlphaPrideGoal;
 import com.tamekind.ai.goal.BabyAnchorGoal;
 import com.tamekind.ai.goal.ConditionGoal;
 import com.tamekind.ai.goal.DrinkGoal;
-import com.tamekind.ai.goal.HerdTrailGoal;
-import com.tamekind.ai.goal.GrazeRestGoal;
-import com.tamekind.ai.goal.HomeReturnGoal;
 import com.tamekind.ai.goal.FollowTrustedPlayerGoal;
-import com.tamekind.ai.goal.LostBabyGoal;
-import com.tamekind.ai.goal.MotherBondGoal;
-import com.tamekind.ai.goal.MatingDisplayGoal;
-import com.tamekind.ai.goal.PetIdleBondGoal;
-import com.tamekind.ai.goal.AgeScaleGoal;
-import com.tamekind.ai.goal.AlphaPrideGoal;
-import com.tamekind.ai.goal.MountObedienceGoal;
-import com.tamekind.ai.goal.PetDangerRelayGoal;
-import com.tamekind.ai.goal.SentinelWatchGoal;
-import com.tamekind.ai.goal.WallowGoal;
+import com.tamekind.ai.goal.GrazeRestGoal;
 import com.tamekind.ai.goal.HabitatShelterGoal;
 import com.tamekind.ai.goal.HerdFollowGoal;
+import com.tamekind.ai.goal.HerdTrailGoal;
+import com.tamekind.ai.goal.HomeReturnGoal;
+import com.tamekind.ai.goal.LostBabyGoal;
+import com.tamekind.ai.goal.MatingDisplayGoal;
+import com.tamekind.ai.goal.MotherBondGoal;
+import com.tamekind.ai.goal.MountObedienceGoal;
 import com.tamekind.ai.goal.PanicGoal;
+import com.tamekind.ai.goal.PetDangerRelayGoal;
+import com.tamekind.ai.goal.PetIdleBondGoal;
+import com.tamekind.ai.goal.SentinelWatchGoal;
 import com.tamekind.ai.goal.TamekindGoal;
-import com.tamekind.TamekindMod;
+import com.tamekind.ai.goal.WallowGoal;
+import com.tamekind.compat.TamekindTags;
 import com.tamekind.config.TamekindConfig;
 import com.tamekind.mixin.MobGoalSelectorAccessor;
+
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.phys.AABB;
 
 public final class PassiveGoalInjector {
@@ -61,7 +64,13 @@ public final class PassiveGoalInjector {
             if (entity instanceof Animal animal && animal.isFood(player.getItemInHand(hand))) {
                 if (shouldBlockCrowdedBreeding(animal)) {
                     if (TamekindConfig.breedingCrowdMessageEnabled) {
-                        player.sendSystemMessage(Component.literal("This pen is too crowded for more breeding."));
+                        // translatableWithFallback, not literal: Tamekind is server-side, so
+                        // the player is normally on a vanilla client that has never heard of
+                        // it. Sending both means that client renders the English while one
+                        // with a Tamekind language file renders the translation.
+                        player.sendSystemMessage(Component.translatableWithFallback(
+                                "tamekind.breeding.crowded",
+                                "This pen is too crowded for more breeding."));
                     }
                     return InteractionResult.FAIL;
                 }
@@ -94,11 +103,18 @@ public final class PassiveGoalInjector {
         });
     }
 
+    /**
+     * Whether feeding this animal counts as feeding a mount, which extends how long the
+     * trust lasts.
+     *
+     * <p>Driven by {@code tamekind:mounts} rather than by matching registry paths in Java.
+     * The old string comparison recognised exactly the ten vanilla ids somebody typed in,
+     * so a mount added by another mod silently missed the bonus and could only be included
+     * by a code change and a release. The shipped tag holds the same ten, so this is
+     * behaviour-neutral on vanilla.
+     */
     private static boolean isMountType(Animal animal) {
-        var id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(animal.getType()).getPath();
-        return id.contains("horse") || id.equals("donkey") || id.equals("mule")
-                || id.equals("llama") || id.equals("trader_llama") || id.equals("camel")
-                || id.equals("pig") || id.equals("strider");
+        return BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(animal.getType()).is(TamekindTags.MOUNTS);
     }
 
     private static void broadcastLightning(net.minecraft.world.entity.LightningBolt bolt,
@@ -167,8 +183,8 @@ public final class PassiveGoalInjector {
 
     /**
      * Logs the live goal table and any same-priority flag collisions for the first
-     * animal injected after a config load. One animal is enough — the table is identical
-     * per species — and doing it once keeps a busy farm from flooding the log.
+     * animal injected after a config load. One animal is enough: the table is identical
+     * per species, and doing it once keeps a busy farm from flooding the log.
      */
     private static void logGoalTableOnce(Animal animal) {
         if (!TamekindConfig.debugLogs || !LOGGED_GOAL_TABLE.compareAndSet(false, true)) return;

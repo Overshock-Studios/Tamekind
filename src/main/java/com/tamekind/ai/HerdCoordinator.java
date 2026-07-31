@@ -32,7 +32,7 @@ public final class HerdCoordinator {
      *
      * <p>The candidate pool must include {@code animal}, otherwise no animal can
      * ever elect itself and every {@code leader == animal} branch in the goals is
-     * dead code — that silently disabled the alpha size bonus and stopped leaders
+     * dead code: that silently disabled the alpha size bonus and stopped leaders
      * from ever publishing a shared shelter, graze or water position. Including
      * self also makes the election agree across the herd: every member scores the
      * same candidate set and picks the same winner, instead of each animal naming
@@ -82,7 +82,7 @@ public final class HerdCoordinator {
      *
      * <p>Rotation is derived from game time rather than stored, which keeps it free of
      * save data and consistent without any handoff message. Members can disagree at the
-     * edges of their scan radius — two lookouts is harmless, and strictly better than
+     * edges of their scan radius: two lookouts is harmless, and strictly better than
      * none.
      *
      * <p>With rotation disabled this collapses to {@link #leaderFor}.

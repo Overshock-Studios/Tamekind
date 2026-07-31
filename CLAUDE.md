@@ -15,7 +15,7 @@ Minecraft version. Keep conventions aligned with it: the `MobGoalSelectorAccesso
 accessor-mixin pattern for goal injection, `<mod>$`-prefixed mixin method names, a
 properties config with named profiles, a `/<modid>` debug command tree, and
 reflection-free soft compat classes under `compat/`. Warband owns hostile AI and
-Tamekind owns passive AI — do not duplicate systems across the two.
+Tamekind owns passive AI: do not duplicate systems across the two.
 
 ## Non-negotiables
 
@@ -29,4 +29,4 @@ Tamekind owns passive AI — do not duplicate systems across the two.
 - **Never reflect on Minecraft member names.** String literals are not remapped, so
   `getDeclaredField("targetSelector")` works in dev and fails silently in a released
   jar. Use an `@Accessor` mixin.
-- **`Vec3.atCenterOf(pos)`, not `pos.getCenter()`** — see `docs/PORTING-26.2.md`.
+- **`Vec3.atCenterOf(pos)`, not `pos.getCenter()`**: see `docs/PORTING-26.2.md`.

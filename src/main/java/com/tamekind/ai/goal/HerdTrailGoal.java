@@ -13,7 +13,7 @@ import java.util.EnumSet;
  * Records the herd leader's recent positions so followers can walk its route instead of
  * cutting a straight line at it. See {@link HerdFollowGoal#follow}.
  *
- * <p>Holds no movement flags and always returns {@code false} from {@link #canUse()} —
+ * <p>Holds no movement flags and always returns {@code false} from {@link #canUse()}:
  * it is a bookkeeping ticker in goal clothing, the same shape as
  * {@link AgeScaleGoal} and {@link PetIdleBondGoal}.
  */

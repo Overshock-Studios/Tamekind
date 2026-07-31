@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Locks the goal priority map.
  *
  * <p>Tamekind injects into the selector vanilla already owns, so a priority is a claim
- * against vanilla's table. These tests encode that table — read out of the 26.1.2
- * bytecode — and fail if a new goal lands somewhere that would make behaviour a coin
+ * against vanilla's table. These tests encode that table: read out of the 26.1.2
+ * bytecode, and fail if a new goal lands somewhere that would make behaviour a coin
  * flip. They cannot see other mods' goals; {@code /tamekind goals} covers that at
  * runtime.
  */

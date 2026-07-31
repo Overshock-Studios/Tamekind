@@ -3,13 +3,15 @@ package com.tamekind.ai.goal;
 import com.tamekind.ai.AiLod;
 import com.tamekind.ai.AnimalMemoryStore;
 import com.tamekind.ai.DangerBroadcaster;
+import com.tamekind.ai.Disposition;
 import com.tamekind.ai.HerdCoordinator;
 import com.tamekind.ai.TamekindAnimalRules;
 import com.tamekind.ai.ThreatScanner;
 import com.tamekind.config.TamekindConfig;
+
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.animal.Animal;
 
 import java.util.EnumSet;
 
@@ -25,7 +27,7 @@ import java.util.EnumSet;
  * player can see why.
  *
  * <p>Lifted from the sentinel behaviour in open-world wildlife sims rather than from
- * any Minecraft mod — no competitor in this niche models a lookout at all
+ * any Minecraft mod: no competitor in this niche models a lookout at all
  * (see {@code docs/FEATURE-GAP.md}).
  */
 public final class SentinelWatchGoal extends Goal implements TamekindGoal {
@@ -85,7 +87,7 @@ public final class SentinelWatchGoal extends Goal implements TamekindGoal {
         if (animal.tickCount % 10 != 0) return;
         double scanRadius = TamekindConfig.alertRadius
                 * TamekindConfig.sentinelAlertRadiusMultiplier
-                * com.tamekind.ai.Disposition.alertMultiplier(animal);
+                * Disposition.alertMultiplier(animal);
         Entity threat = ThreatScanner.nearestThreat(animal, scanRadius);
         if (threat != null) {
             // The whole point of a lookout: the herd learns about it from the alpha.

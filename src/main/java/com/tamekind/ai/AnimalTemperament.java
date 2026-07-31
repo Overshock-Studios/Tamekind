@@ -10,7 +10,7 @@ import net.minecraft.world.entity.animal.Animal;
  * <p>Derived deterministically from the entity UUID, so it needs no storage, no
  * codec and no save data, and it is stable across reloads and across client/server.
  * The high UUID bits are used because {@code PassiveGoalInjector} seeds size
- * variance from the low bits — a shared seed would visually telegraph temperament,
+ * variance from the low bits: a shared seed would visually telegraph temperament,
  * making every skittish cow the same size.
  *
  * <p>This is the behaviour-only answer to the trait and genetics systems in the
