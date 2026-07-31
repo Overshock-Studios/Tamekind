@@ -8,6 +8,7 @@
     "ChickenNestMixin",
     "FoxHuntMixin",
     "MobGoalSelectorAccessor",
+    "MobSoundInvoker",
     "WolfHuntMixin"
   ],
   "client": [],

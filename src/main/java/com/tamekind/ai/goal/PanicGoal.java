@@ -1,6 +1,7 @@
 package com.tamekind.ai.goal;
 
 import com.tamekind.ai.AiLod;
+import com.tamekind.ai.AlarmSound;
 import com.tamekind.ai.AnimalMemory;
 import com.tamekind.ai.AnimalMemoryStore;
 import com.tamekind.ai.DangerBroadcaster;
@@ -63,9 +64,8 @@ public final class PanicGoal extends Goal implements TamekindGoal {
     @Override
     public void start() {
         if (TamekindConfig.panicSoundEnabled) {
-            animal.playSound(net.minecraft.sounds.SoundEvents.GENERIC_HURT,
-                    TamekindConfig.panicSoundVolume,
-                    0.9f + animal.getRandom().nextFloat() * 0.2f);
+            AlarmSound.alarm(animal, TamekindConfig.panicSoundVolume,
+                    1.3f + animal.getRandom().nextFloat() * 0.2f);
         }
         act();
     }

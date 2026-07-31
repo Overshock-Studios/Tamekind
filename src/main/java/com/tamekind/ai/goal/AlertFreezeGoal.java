@@ -1,6 +1,7 @@
 package com.tamekind.ai.goal;
 
 import com.tamekind.ai.AiLod;
+import com.tamekind.ai.AlarmSound;
 import com.tamekind.ai.AnimalTemperament;
 import com.tamekind.ai.Disposition;
 import com.tamekind.ai.TamekindAnimalRules;
@@ -47,9 +48,8 @@ public final class AlertFreezeGoal extends Goal implements TamekindGoal {
     @Override
     public void start() {
         if (TamekindConfig.panicSoundEnabled) {
-            animal.playSound(net.minecraft.sounds.SoundEvents.GENERIC_HURT,
-                    TamekindConfig.panicSoundVolume * 0.5f,
-                    1.2f + animal.getRandom().nextFloat() * 0.2f);
+            AlarmSound.alarm(animal, TamekindConfig.panicSoundVolume * 0.5f,
+                    1.15f + animal.getRandom().nextFloat() * 0.15f);
         }
         int rnd = Math.max(1, TamekindConfig.alertFreezeRandomTicks);
         int min = TamekindConfig.alertFreezeMinTicks;
