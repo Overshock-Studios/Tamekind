@@ -50,3 +50,6 @@ graphify-out/
 
 # Claude Code personal settings
 .claude/settings.local.json
+
+# Mob renders fetched by scripts/make_icon.py --fetch-mobs (third-party build input)
+scripts/.mob-cache/
