@@ -43,7 +43,7 @@ Most animal mods work with no action at all. [Serene Seasons](https://modrinth.c
 
 ## Requirements
 
-Fabric API, Minecraft 26.1.2.
+Fabric API.
 
 ## License
 
