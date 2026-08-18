@@ -4,17 +4,13 @@
 
 A cow lifts its head while the rest of the herd grazes, because something is moving at the treeline. A rabbit freezes instead of bolting. A sheep that you have hand-fed for a week no longer scatters when you sprint past. The herd that watched you cull three of its own stops running from you at all.
 
-Tamekind is a vanilla+ AI overhaul for passive mobs: cows, sheep, pigs, horses, goats, llamas, rabbits, chickens, wolves and foxes.
+Tamekind is a vanilla+ AI overhaul for passive mobs: cows, sheep, pigs, etc.
 
 ## Why you might want it
-
-**It adds nothing.** No items, no blocks, no entities, no recipes, no new mobs. Every change is behaviour, so your world looks exactly the same and your recipes and loot are untouched.
 
 **Your farms keep working.** Leashed, mounted, name-tagged, breeding and tamed animals opt out of everything Tamekind does and keep their vanilla AI. Breeding pens, lead-and-boat runs and named pets behave the way you built them to.
 
 **Nobody has to install anything.** Server-side. Players connect with a vanilla client and still see all of it. Works in singleplayer too, and you can add it to a world you already have.
-
-**It stays cheap.** Animals far from any player drop to cheaper AI or stop thinking entirely, so a hundred-cow farm does not cost what a hundred cows of full AI would.
 
 ## What changes
 
@@ -32,7 +28,7 @@ Tamekind is a vanilla+ AI overhaul for passive mobs: cows, sheep, pigs, horses, 
 
 ## Documentation
 
-Everything else lives in the **[wiki](../../wiki)**:
+Everything else is in the **[wiki](../../wiki)**:
 
 - **[How It Works](../../wiki/How-It-Works)** the systems in detail
 - **[Commands](../../wiki/Commands)** and **[Configuration](../../wiki/Configuration)**
@@ -43,7 +39,7 @@ Everything else lives in the **[wiki](../../wiki)**:
 
 ## Compatibility
 
-Most animal mods work with no action at all. [Serene Seasons](https://modrinth.com/mod/serene-seasons) and vanilla or [Warband](https://modrinth.com/mod/warband) raids are auto-detected with no hard dependency. Modded animals, blocks and predators are added through datapack tags rather than a code change.
+Most animal mods work with no action at all. [Serene Seasons](https://modrinth.com/mod/serene-seasons) and vanilla or [Warband](https://modrinth.com/mod/warband) raids are auto-detected with no hard dependency. Modded animals, blocks and predators can be added through datapack tags.
 
 ## Requirements
 
